@@ -13,51 +13,13 @@ import 'package:supabase_basic/core/widgets/custom_button.dart'
 import 'package:supabase_basic/core/widgets/custom_text_field.dart';
 import 'package:supabase_basic/core/widgets/or_divider.dart';
 import 'package:supabase_basic/core/widgets/social_login_button.dart';
-import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
+import 'package:supabase_basic/features/auth/provider/login_provider.dart';
 import 'package:supabase_basic/features/auth/screens/welcome_screen.dart';
 import 'signup_screen.dart';
 
-/// Login screen with illustration, email/password fields,
-/// social login buttons, and a link to Sign Up.
-class LoginScreen extends StatefulWidget {
+/// Login screen — pure UI, all logic lives in LoginProvider.
+class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
-
-  @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _handleLogin() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text.trim();
-
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter email and password')),
-      );
-      return;
-    }
-
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final success = await authProvider.signIn(email, password);
-
-    if (!success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(authProvider.errorMessage ?? 'Login failed')),
-      );
-    }
-    // If success, AuthGate's stream will automatically navigate to HomeScreen
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,12 +46,17 @@ class _LoginScreenState extends State<LoginScreen> {
               FadeInUp(
                 delay: const Duration(milliseconds: 400),
                 duration: const Duration(milliseconds: 600),
-                child: CustomTextField(
-                  hintText: AppStrings.email,
-                  prefixIcon: Iconsax.sms,
-                  keyboardType: TextInputType.emailAddress,
-                  controller: _emailController,
-                  textInputAction: TextInputAction.next,
+                child: Consumer<LoginProvider>(
+                  builder: (context, loginProv, _) {
+                    return CustomTextField(
+                      hintText: AppStrings.email,
+                      prefixIcon: Iconsax.sms,
+                      keyboardType: TextInputType.emailAddress,
+                      controller: loginProv.emailController,
+                      textInputAction: TextInputAction.next,
+                      errorText: loginProv.emailError,
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: AppSizes.md),
@@ -98,12 +65,17 @@ class _LoginScreenState extends State<LoginScreen> {
               FadeInUp(
                 delay: const Duration(milliseconds: 500),
                 duration: const Duration(milliseconds: 600),
-                child: CustomTextField(
-                  hintText: AppStrings.password,
-                  prefixIcon: Iconsax.lock,
-                  isPassword: true,
-                  controller: _passwordController,
-                  textInputAction: TextInputAction.done,
+                child: Consumer<LoginProvider>(
+                  builder: (context, loginProv, _) {
+                    return CustomTextField(
+                      hintText: AppStrings.password,
+                      prefixIcon: Iconsax.lock,
+                      isPassword: true,
+                      controller: loginProv.passwordController,
+                      textInputAction: TextInputAction.done,
+                      errorText: loginProv.passwordError,
+                    );
+                  },
                 ),
               ),
 
@@ -126,12 +98,22 @@ class _LoginScreenState extends State<LoginScreen> {
               FadeInUp(
                 delay: const Duration(milliseconds: 700),
                 duration: const Duration(milliseconds: 600),
-                child: Consumer<AuthProvider>(
-                  builder: (context, auth, _) {
+                child: Consumer<LoginProvider>(
+                  builder: (context, loginProv, _) {
                     return CustomButton(
                       text: AppStrings.login,
-                      onPressed: _handleLogin,
-                      isLoading: auth.isLoading,
+                      onPressed: () async {
+                        final success = await loginProv.handleLogin();
+                        if (!success && context.mounted) {
+                          if (loginProv.errorMessage != null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(loginProv.errorMessage!)),
+                            );
+                          }
+                        }
+                        // On success, AuthGate stream navigates to HomeScreen
+                      },
+                      isLoading: loginProv.isLoading,
                     );
                   },
                 ),

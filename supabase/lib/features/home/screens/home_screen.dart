@@ -7,21 +7,6 @@ import 'package:supabase_basic/core/constants/app_sizes.dart';
 import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// A simple Note model.
-class _Note {
-  final String title;
-  final String content;
-  final DateTime createdAt;
-  final Color color;
-
-  _Note({
-    required this.title,
-    required this.content,
-    required this.createdAt,
-    required this.color,
-  });
-}
-
 /// Home screen with a notes list and a FAB that opens
 /// a dialog to add new notes, displayed on the UI.
 class HomeScreen extends StatefulWidget {
@@ -32,7 +17,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<_Note> _notes = [];
   final titleController = TextEditingController();
   final contentController = TextEditingController();
   // Predefined card accent colors for visual variety
