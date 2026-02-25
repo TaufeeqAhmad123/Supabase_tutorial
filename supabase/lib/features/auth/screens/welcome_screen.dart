@@ -4,7 +4,10 @@ import 'package:iconsax/iconsax.dart';
 import 'package:supabase/core/constants/app_colors.dart';
 import 'package:supabase/core/constants/app_sizes.dart';
 import 'package:supabase/core/constants/app_strings.dart';
+import 'package:supabase/core/theme/page_transitions.dart';
 import 'package:supabase/core/widgets/custom_button.dart';
+import 'package:supabase/features/home/screens/home_screen.dart';
+
 
 /// Welcome / Success screen shown after verification.
 /// Features scale-in + fade confetti-like animation.
@@ -180,7 +183,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     child: CustomButton(
                       text: AppStrings.continueText,
                       onPressed: () {
-                        // Navigate to home or main app
+                        Navigator.of(context).pushAndRemoveUntil(
+                          AppPageTransitions.fadeSlide(const HomeScreen()),
+                          (route) => false,
+                        );
                       },
                       gradient: AppColors.accentGradient,
                     ),
@@ -202,7 +208,7 @@ class _AnimBuilder extends AnimatedWidget {
   const _AnimBuilder({
     required Animation<double> animation,
     required this.builder,
-    this.child,
+    this.child, // ignore: unused_element_parameter
   }) : super(listenable: animation);
 
   final Widget Function(BuildContext, Widget?) builder;

@@ -10,6 +10,7 @@ import 'package:supabase/core/widgets/custom_text_field.dart';
 import 'package:supabase/core/widgets/social_login_button.dart';
 import 'package:supabase/core/widgets/or_divider.dart';
 import 'package:supabase/core/theme/page_transitions.dart';
+import 'package:supabase/features/auth/screens/welcome_screen.dart';
 import 'signup_screen.dart';
 
 /// Login screen with illustration, email/password fields,
@@ -162,7 +163,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   label: AppStrings.facebook,
                   icon: Icons.facebook_rounded,
                   iconColor: const Color(0xFF1877F2),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      AppPageTransitions.fadeSlide(const WelcomeScreen()),
+                    );
+                  },
                 ),
               ),
 
