@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
-import '../constants/app_colors.dart';
-import '../constants/app_sizes.dart';
+import 'package:supabase/core/constants/app_colors.dart';
+import 'package:supabase/core/constants/app_sizes.dart';
 
 /// A reusable header widget that shows an illustration placeholder,
 /// a title, and an optional subtitle with staggered fade-in animations.

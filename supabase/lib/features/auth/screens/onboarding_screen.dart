@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:iconsax/iconsax.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_sizes.dart';
-import '../../core/constants/app_strings.dart';
-import '../../core/widgets/custom_button.dart';
-import '../../core/theme/page_transitions.dart';
+import 'package:supabase/core/constants/app_colors.dart';
+import 'package:supabase/core/constants/app_sizes.dart';
+import 'package:supabase/core/constants/app_strings.dart';
+import 'package:supabase/core/widgets/custom_button.dart';
+import 'package:supabase/core/theme/page_transitions.dart';
 import 'login_screen.dart';
 
 /// Data model for a single onboarding page.

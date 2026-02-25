@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:iconsax/iconsax.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_sizes.dart';
-import '../../core/constants/app_strings.dart';
-import '../../core/widgets/auth_header.dart';
-import '../../core/widgets/custom_button.dart';
-import '../../core/widgets/custom_text_field.dart';
-import '../../core/theme/page_transitions.dart';
+import 'package:supabase/core/constants/app_colors.dart';
+import 'package:supabase/core/constants/app_sizes.dart';
+import 'package:supabase/core/constants/app_strings.dart';
+import 'package:supabase/core/widgets/auth_header.dart';
+import 'package:supabase/core/widgets/custom_button.dart';
+import 'package:supabase/core/widgets/custom_text_field.dart';
+import 'package:supabase/core/theme/page_transitions.dart';
 import 'email_verification_screen.dart';
 
 /// Sign Up screen with name, email, password, confirm password.
@@ -23,7 +23,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
 
   // Validation state
@@ -91,6 +90,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -112,7 +113,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(AppSizes.radiusMd),
                         side: BorderSide(
-                          color: Theme.of(context).brightness == Brightness.dark
+                          color: isDark
                               ? AppColors.inputBorderDark
                               : AppColors.inputBorder,
                         ),

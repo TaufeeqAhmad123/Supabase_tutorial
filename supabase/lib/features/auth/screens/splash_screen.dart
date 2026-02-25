@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:supabase/core/constants/app_colors.dart';
+import 'package:supabase/core/constants/app_strings.dart';
 import 'package:supabase/core/constants/app_sizes.dart';
 import 'package:supabase/core/theme/page_transitions.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_strings.dart';
-import '../../core/constants/app_sizes.dart';
-import '../../core/theme/page_transitions.dart';
 import 'onboarding_screen.dart';
 
 /// Splash screen with a fade + scale logo animation and gradient background.
@@ -113,7 +111,7 @@ class _SplashScreenState extends State<SplashScreen>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Logo
-                  AnimatedBuilder(
+                  _AnimatedBuilder(
                     animation: _logoController,
                     builder: (context, child) {
                       return Opacity(
@@ -228,9 +226,8 @@ class _SplashScreenState extends State<SplashScreen>
 }
 
 /// Minimal animated builder helper.
-class AnimatedBuilder extends AnimatedWidget {
-  const AnimatedBuilder({
-    super.key,
+class _AnimatedBuilder extends AnimatedWidget {
+  const _AnimatedBuilder({
     required Animation<double> animation,
     required this.builder,
     this.child,

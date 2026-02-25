@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
-import '../constants/app_sizes.dart';
+import 'package:supabase/core/constants/app_colors.dart';
+import 'package:supabase/core/constants/app_sizes.dart';
 
 /// A horizontal "OR" divider with customizable text.
 class OrDivider extends StatelessWidget {

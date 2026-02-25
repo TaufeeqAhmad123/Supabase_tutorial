@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
-import '../constants/app_sizes.dart';
+import 'package:supabase/core/constants/app_colors.dart';
+import 'package:supabase/core/constants/app_sizes.dart';
 
 /// Custom page-transition builder for smooth navigation throughout the app.
 /// Uses a combined fade + slide from bottom for a premium feel.

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
+import 'package:supabase/core/constants/app_colors.dart';
 
 /// A smooth animated loader — a triple-dot pulsing indicator
 /// that can be embedded anywhere (e.g. inside a button or page).
@@ -65,20 +65,4 @@ class _AnimatedLoaderState extends State<AnimatedLoader>
     if (t < 0.5) return 4 * t * t * (3 - 4 * t);
     return 1 - 4 * (t - 0.5) * (t - 0.5) * (3 - 4 * (t - 0.5));
   }
-}
-
-/// Minimal animated builder helper.
-class AnimatedBuilder extends AnimatedWidget {
-  const AnimatedBuilder({
-    super.key,
-    required Animation<double> animation,
-    required this.builder,
-    this.child,
-  }) : super(listenable: animation);
-
-  final Widget Function(BuildContext, Widget?) builder;
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) => builder(context, child);
 }

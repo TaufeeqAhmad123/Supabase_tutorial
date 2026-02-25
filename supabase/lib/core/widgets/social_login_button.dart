@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
-import '../constants/app_sizes.dart';
+import 'package:supabase/core/constants/app_colors.dart';
+import 'package:supabase/core/constants/app_sizes.dart';
 
 /// A social-login button (Google / Apple / Facebook).
 /// Displays a branded icon + label inside a rounded outlined container.

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:iconsax/iconsax.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_sizes.dart';
-import '../../core/constants/app_strings.dart';
-import '../../core/widgets/custom_button.dart';
+import 'package:supabase/core/constants/app_colors.dart';
+import 'package:supabase/core/constants/app_sizes.dart';
+import 'package:supabase/core/constants/app_strings.dart';
+import 'package:supabase/core/widgets/custom_button.dart';
 
 /// Welcome / Success screen shown after verification.
 /// Features scale-in + fade confetti-like animation.
@@ -49,7 +49,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       body: Stack(
         children: [
           // ── Animated background gradient ──────────────────
-          AnimatedBuilder(
+          _AnimBuilder(
             animation: _bgController,
             builder: (context, child) {
               return Container(
@@ -74,7 +74,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
           // ── Floating particles ────────────────────────────
           ...List.generate(6, (i) {
-            return AnimatedBuilder(
+            return _AnimBuilder(
               animation: _particleController,
               builder: (context, child) {
                 final progress = (_particleController.value + i * 0.15) % 1.0;
@@ -198,9 +198,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 }
 
 /// Minimal animated builder helper.
-class AnimatedBuilder extends AnimatedWidget {
-  const AnimatedBuilder({
-    super.key,
+class _AnimBuilder extends AnimatedWidget {
+  const _AnimBuilder({
     required Animation<double> animation,
     required this.builder,
     this.child,

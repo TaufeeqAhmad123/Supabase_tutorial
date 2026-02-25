@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:iconsax/iconsax.dart';
-import '../../core/constants/app_colors.dart';
-import '../../core/constants/app_sizes.dart';
-import '../../core/constants/app_strings.dart';
-import '../../core/widgets/auth_header.dart';
-import '../../core/widgets/custom_button.dart';
-import '../../core/widgets/custom_text_field.dart';
-import '../../core/widgets/social_login_button.dart';
-import '../../core/widgets/or_divider.dart';
-import '../../core/theme/page_transitions.dart';
+import 'package:supabase/core/constants/app_colors.dart';
+import 'package:supabase/core/constants/app_sizes.dart';
+import 'package:supabase/core/constants/app_strings.dart';
+import 'package:supabase/core/widgets/auth_header.dart';
+import 'package:supabase/core/widgets/custom_button.dart';
+import 'package:supabase/core/widgets/custom_text_field.dart';
+import 'package:supabase/core/widgets/social_login_button.dart';
+import 'package:supabase/core/widgets/or_divider.dart';
+import 'package:supabase/core/theme/page_transitions.dart';
 import 'signup_screen.dart';
 
 /// Login screen with illustration, email/password fields,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
-import '../constants/app_sizes.dart';
+import 'package:supabase/core/constants/app_colors.dart';
+import 'package:supabase/core/constants/app_sizes.dart';
 
 /// A beautifully styled text field with:
 /// - Focus animation (border glow)
@@ -61,9 +61,10 @@ class _CustomTextFieldState extends State<CustomTextField>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _glowAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _glowController, curve: Curves.easeOut),
-    );
+    _glowAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _glowController, curve: Curves.easeOut));
   }
 
   void _handleFocusChange() {
@@ -84,7 +85,6 @@ class _CustomTextFieldState extends State<CustomTextField>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final hasError = widget.errorText != null && widget.errorText!.isNotEmpty;
 
     return AnimatedBuilder(
@@ -96,7 +96,9 @@ class _CustomTextFieldState extends State<CustomTextField>
             boxShadow: _isFocused && !hasError
                 ? [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.15 * _glowAnimation.value),
+                      color: AppColors.primary.withValues(
+                        alpha: 0.15 * _glowAnimation.value,
+                      ),
                       blurRadius: 12 * _glowAnimation.value,
                       offset: const Offset(0, 4),
                     ),
@@ -127,7 +129,9 @@ class _CustomTextFieldState extends State<CustomTextField>
           suffixIcon: widget.isPassword
               ? IconButton(
                   icon: Icon(
-                    _obscure ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                    _obscure
+                        ? Icons.visibility_off_rounded
+                        : Icons.visibility_rounded,
                     size: 20,
                   ),
                   onPressed: () => setState(() => _obscure = !_obscure),
@@ -137,20 +141,4 @@ class _CustomTextFieldState extends State<CustomTextField>
       ),
     );
   }
-}
-
-/// Minimal animated builder helper (wraps AnimatedWidget).
-class AnimatedBuilder extends AnimatedWidget {
-  const AnimatedBuilder({
-    super.key,
-    required Animation<double> animation,
-    required this.builder,
-    this.child,
-  }) : super(listenable: animation);
-
-  final Widget Function(BuildContext, Widget?) builder;
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) => builder(context, child);
 }

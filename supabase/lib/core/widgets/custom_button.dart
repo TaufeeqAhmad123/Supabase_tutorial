@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../constants/app_colors.dart';
-import '../constants/app_sizes.dart';
+import 'package:supabase/core/constants/app_colors.dart';
+import 'package:supabase/core/constants/app_sizes.dart';
 
 /// A premium, customizable button supporting:
 /// - **primary** – filled gradient / solid primary color
@@ -55,8 +55,6 @@ class _CustomButtonState extends State<CustomButton>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 120),
-      lowerBound: 0.0,
-      upperBound: 0.04,
     );
     _scaleAnimation = Tween<double>(
       begin: 1.0,
@@ -189,47 +187,5 @@ class _CustomButtonState extends State<CustomButton>
         ],
       ],
     );
-  }
-}
-
-/// Helper widget – AnimatedBuilder doesn't exist in Flutter SDK, use AnimatedBuilder pattern
-class AnimatedBuilder extends StatelessWidget {
-  const AnimatedBuilder({
-    super.key,
-    required this.animation,
-    required this.builder,
-    this.child,
-  });
-
-  final Animation<double> animation;
-  final Widget Function(BuildContext, Widget?) builder;
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder2(
-      animation: animation,
-      builder: builder,
-      listenable: animation,
-      child: child,
-    );
-  }
-}
-
-class AnimatedBuilder2 extends AnimatedWidget {
-  const AnimatedBuilder2({
-    super.key,
-    required super.listenable,
-    required this.builder,
-    this.child,
-  }) : super();
-
-  Animation<double> get animation => listenable as Animation<double>;
-  final Widget Function(BuildContext, Widget?) builder;
-  final Widget? child;
-
-  @override
-  Widget build(BuildContext context) {
-    return builder(context, child);
   }
 }
