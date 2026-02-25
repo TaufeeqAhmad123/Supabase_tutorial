@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_basic/core/constants/app_colors.dart';
 import 'package:supabase_basic/core/constants/app_sizes.dart';
 import 'package:supabase_basic/core/constants/app_strings.dart';
-import 'package:supabase_basic/core/theme/page_transitions.dart';
 import 'package:supabase_basic/core/widgets/auth_header.dart';
 import 'package:supabase_basic/core/widgets/custom_button.dart';
 import 'package:supabase_basic/core/widgets/custom_text_field.dart';
-
-import 'email_verification_screen.dart';
+import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
 
 /// Sign Up screen with name, email, password, confirm password.
 class SignUpScreen extends StatefulWidget {
@@ -24,7 +23,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  bool _isLoading = false;
 
   // Validation state
   String? _nameError;
@@ -41,7 +39,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.dispose();
   }
 
-  void _handleSignUp() {
+  Future<void> _handleSignUp() async {
     // Reset errors
     setState(() {
       _nameError = null;
@@ -77,16 +75,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return;
     }
 
-    // Simulate loading
-    setState(() => _isLoading = true);
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        Navigator.of(
-          context,
-        ).push(AppPageTransitions.fadeSlide(const EmailVerificationScreen()));
-      }
-    });
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final success = await authProvider.signUp(
+      _emailController.text.trim(),
+      _passwordController.text.trim(),
+    );
+
+    if (!success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(authProvider.errorMessage ?? 'Sign up failed')),
+      );
+    } else if (success && mounted) {
+      // Pop all screens back to AuthGate so it shows HomeScreen
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
   }
 
   @override
@@ -199,10 +201,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
               FadeInUp(
                 delay: const Duration(milliseconds: 800),
                 duration: const Duration(milliseconds: 600),
-                child: CustomButton(
-                  text: AppStrings.createAccount,
-                  onPressed: _handleSignUp,
-                  isLoading: _isLoading,
+                child: Consumer<AuthProvider>(
+                  builder: (context, auth, _) {
+                    return CustomButton(
+                      text: AppStrings.createAccount,
+                      onPressed: _handleSignUp,
+                      isLoading: auth.isLoading,
+                    );
+                  },
                 ),
               ),
 

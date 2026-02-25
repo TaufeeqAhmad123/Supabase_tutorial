@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_basic/core/constants/app_colors.dart';
 import 'package:supabase_basic/core/constants/app_sizes.dart';
+import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// A simple Note model.
@@ -337,8 +339,10 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Padding(
               padding: const EdgeInsets.only(right: AppSizes.sm),
               child: IconButton(
-                onPressed: () {},
-                icon: const Icon(Iconsax.setting_2, size: 22),
+                onPressed: () {
+                  Provider.of<AuthProvider>(context, listen: false).signOut();
+                },
+                icon: const Icon(Iconsax.logout, size: 22),
               ),
             ),
           ),

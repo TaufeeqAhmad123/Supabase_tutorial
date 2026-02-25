@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:provider/provider.dart';
 
 import 'package:supabase_basic/core/constants/app_colors.dart';
 import 'package:supabase_basic/core/constants/app_sizes.dart';
 import 'package:supabase_basic/core/constants/app_strings.dart';
 import 'package:supabase_basic/core/theme/page_transitions.dart';
 import 'package:supabase_basic/core/widgets/auth_header.dart';
-import 'package:supabase_basic/core/widgets/custom_button.dart' show CustomButton;
+import 'package:supabase_basic/core/widgets/custom_button.dart'
+    show CustomButton;
 import 'package:supabase_basic/core/widgets/custom_text_field.dart';
 import 'package:supabase_basic/core/widgets/or_divider.dart';
 import 'package:supabase_basic/core/widgets/social_login_button.dart';
+import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
 import 'package:supabase_basic/features/auth/screens/welcome_screen.dart';
 import 'signup_screen.dart';
 
@@ -26,7 +29,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -35,12 +37,26 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
-    // UI-only: simulate loading
-    setState(() => _isLoading = true);
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) setState(() => _isLoading = false);
-    });
+  Future<void> _handleLogin() async {
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter email and password')),
+      );
+      return;
+    }
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final success = await authProvider.signIn(email, password);
+
+    if (!success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(authProvider.errorMessage ?? 'Login failed')),
+      );
+    }
+    // If success, AuthGate's stream will automatically navigate to HomeScreen
   }
 
   @override
@@ -110,10 +126,14 @@ class _LoginScreenState extends State<LoginScreen> {
               FadeInUp(
                 delay: const Duration(milliseconds: 700),
                 duration: const Duration(milliseconds: 600),
-                child: CustomButton(
-                  text: AppStrings.login,
-                  onPressed: _handleLogin,
-                  isLoading: _isLoading,
+                child: Consumer<AuthProvider>(
+                  builder: (context, auth, _) {
+                    return CustomButton(
+                      text: AppStrings.login,
+                      onPressed: _handleLogin,
+                      isLoading: auth.isLoading,
+                    );
+                  },
                 ),
               ),
 
@@ -165,9 +185,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   icon: Icons.facebook_rounded,
                   iconColor: const Color(0xFF1877F2),
                   onPressed: () {
-                    Navigator.of(context).push(
-                      AppPageTransitions.fadeSlide(const WelcomeScreen()),
-                    );
+                    Navigator.of(
+                      context,
+                    ).push(AppPageTransitions.fadeSlide(const WelcomeScreen()));
                   },
                 ),
               ),

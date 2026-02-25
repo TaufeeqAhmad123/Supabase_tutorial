@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_basic/core/constants/api_key.dart';
+import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/theme/app_theme.dart';
 import 'features/auth/screens/splash_screen.dart';
 
 /// Entry point of the Luxe app — premium Flutter UI showcase.
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Supabase.initialize(
     url: ApiKey.supabaseUrl,
@@ -30,16 +32,19 @@ class LuxeApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Luxe',
-      debugShowCheckedModeBanner: false,
+    return ChangeNotifierProvider(
+      create: (_) => AuthProvider(),
+      child: MaterialApp(
+        title: 'Luxe',
+        debugShowCheckedModeBanner: false,
 
-      // ── Themes ──────────────────────────────────────────
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system, // Follows device setting
-      // ── Start screen ────────────────────────────────────
-      home: const SplashScreen(),
+        // ── Themes ──────────────────────────────────────────
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: ThemeMode.system, // Follows device setting
+        // ── Start screen ────────────────────────────────────
+        home: const SplashScreen(),
+      ),
     );
   }
 }

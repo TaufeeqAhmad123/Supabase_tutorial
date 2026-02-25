@@ -5,7 +5,7 @@ import 'package:supabase_basic/core/constants/app_colors.dart';
 import 'package:supabase_basic/core/constants/app_sizes.dart';
 import 'package:supabase_basic/core/constants/app_strings.dart';
 import 'package:supabase_basic/core/theme/page_transitions.dart';
-import 'onboarding_screen.dart';
+import 'auth_gate.dart';
 
 /// Splash screen with a fade + scale logo animation and gradient background.
 class SplashScreen extends StatefulWidget {
@@ -66,9 +66,9 @@ class _SplashScreenState extends State<SplashScreen>
     // Navigate after splash
     Future.delayed(const Duration(milliseconds: 2800), () {
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          AppPageTransitions.fadeSlide(const OnboardingScreen()),
-        );
+        Navigator.of(
+          context,
+        ).pushReplacement(AppPageTransitions.fadeSlide(const AuthGate()));
       }
     });
   }

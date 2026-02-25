@@ -17,6 +17,7 @@ dependencies:
   flutter_staggered_animations: ^1.1.1
   iconsax: ^0.0.8
   supabase_flutter: ^2.12.0
+  provider: ^6.1.5+1
 
 dev_dependencies:
   flutter_test:
