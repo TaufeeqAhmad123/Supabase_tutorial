@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:supabase/core/constants/app_colors.dart';
-import 'package:supabase/core/constants/app_sizes.dart';
+import 'package:supabase_basic/core/constants/app_colors.dart';
+import 'package:supabase_basic/core/constants/app_sizes.dart';
 
 /// A premium, customizable button supporting:
 /// - **primary** – filled gradient / solid primary color

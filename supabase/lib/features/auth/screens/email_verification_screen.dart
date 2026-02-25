@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:pinput/pinput.dart';
-import 'package:supabase/core/constants/app_colors.dart';
-import 'package:supabase/core/constants/app_sizes.dart';
-import 'package:supabase/core/constants/app_strings.dart';
-import 'package:supabase/core/theme/page_transitions.dart';
-import 'package:supabase/core/widgets/auth_header.dart';
-import 'package:supabase/core/widgets/custom_button.dart';
+
+import 'package:supabase_basic/core/constants/app_colors.dart';
+import 'package:supabase_basic/core/constants/app_sizes.dart';
+import 'package:supabase_basic/core/constants/app_strings.dart';
+import 'package:supabase_basic/core/theme/page_transitions.dart';
+import 'package:supabase_basic/core/widgets/auth_header.dart';
+import 'package:supabase_basic/core/widgets/custom_button.dart';
 import 'welcome_screen.dart';
 
 /// Email verification screen with OTP input and a success micro-interaction.

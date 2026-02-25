@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:supabase/core/constants/app_colors.dart';
+import 'package:supabase_basic/core/constants/app_colors.dart';
 
 /// A smooth animated loader — a triple-dot pulsing indicator
 /// that can be embedded anywhere (e.g. inside a button or page).

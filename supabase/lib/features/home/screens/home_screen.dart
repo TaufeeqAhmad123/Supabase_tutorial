@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:supabase/core/constants/app_colors.dart';
-import 'package:supabase/core/constants/app_sizes.dart';
+import 'package:supabase_basic/core/constants/app_colors.dart';
+import 'package:supabase_basic/core/constants/app_sizes.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// A simple Note model.
 class _Note {
@@ -30,7 +31,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final List<_Note> _notes = [];
-
+  final titleController = TextEditingController();
+  final contentController = TextEditingController();
   // Predefined card accent colors for visual variety
   static const _cardColors = [
     Color(0xFFE8DEFF), // lavender
@@ -51,9 +53,6 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   void _showAddNoteDialog() {
-    final titleController = TextEditingController();
-    final contentController = TextEditingController();
-
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
@@ -244,21 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           final content = contentController.text.trim();
                           if (title.isEmpty && content.isEmpty) return;
 
-                          setState(() {
-                            _notes.insert(
-                              0,
-                              _Note(
-                                title: title.isEmpty ? 'Untitled' : title,
-                                content: content,
-                                createdAt: DateTime.now(),
-                                color: isDark
-                                    ? _cardColorsDark[_notes.length %
-                                          _cardColorsDark.length]
-                                    : _cardColors[_notes.length %
-                                          _cardColors.length],
-                              ),
-                            );
-                          });
+                          addNotes();
                           Navigator.pop(context);
                         },
                         child: const Row(
@@ -291,6 +276,16 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
   }
+
+  void addNotes() async {
+    await Supabase.instance.client.from('Notes').insert({
+      'body': contentController.text.trim(),
+    });
+  }
+
+  final _noteStream = Supabase.instance.client
+      .from('Notes')
+      .stream(primaryKey: ['id']);
 
   @override
   Widget build(BuildContext context) {
@@ -351,9 +346,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
 
       // ── Body ────────────────────────────────────────────
-      body: _notes.isEmpty
-          ? _buildEmptyState(context)
-          : _buildNotesList(context),
+      body: _buildNotesList(context),
 
       // ── FAB ─────────────────────────────────────────────
       floatingActionButton: FadeInUp(
@@ -429,25 +422,58 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Notes list — a staggered card layout.
   Widget _buildNotesList(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(
-        AppSizes.md,
-        AppSizes.md,
-        AppSizes.md,
-        100,
-      ),
-      itemCount: _notes.length,
-      itemBuilder: (context, index) {
-        final note = _notes[index];
-        return FadeInUp(
-          delay: Duration(milliseconds: 80 * index),
-          duration: const Duration(milliseconds: 500),
-          child: _NoteCard(
-            note: note,
-            onDelete: () {
-              setState(() => _notes.removeAt(index));
-            },
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: _noteStream,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final notes = snapshot.data!;
+
+        if (notes.isEmpty) {
+          return _buildEmptyState(context);
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.fromLTRB(
+            AppSizes.md,
+            AppSizes.md,
+            AppSizes.md,
+            100,
           ),
+          itemCount: notes.length,
+          itemBuilder: (context, index) {
+            final noteData = notes[index];
+            final body = noteData['body'] as String? ?? '';
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            final color = isDark
+                ? _cardColorsDark[index % _cardColorsDark.length]
+                : _cardColors[index % _cardColors.length];
+
+            return FadeInUp(
+              delay: Duration(milliseconds: 80 * index),
+              duration: const Duration(milliseconds: 500),
+              child: _NoteCard(
+                body: body,
+                color: color,
+                createdAt:
+                    DateTime.tryParse(
+                      noteData['created_at']?.toString() ?? '',
+                    ) ??
+                    DateTime.now(),
+                onDelete: () async {
+                  final id = noteData['id'];
+                  if (id != null) {
+                    await Supabase.instance.client
+                        .from('Notes')
+                        .delete()
+                        .eq('id', id);
+                  }
+                },
+              ),
+            );
+          },
         );
       },
     );
@@ -456,20 +482,27 @@ class _HomeScreenState extends State<HomeScreen> {
 
 /// A premium-styled note card.
 class _NoteCard extends StatelessWidget {
-  const _NoteCard({required this.note, required this.onDelete});
+  const _NoteCard({
+    required this.body,
+    required this.color,
+    required this.createdAt,
+    required this.onDelete,
+  });
 
-  final _Note note;
+  final String body;
+  final Color color;
+  final DateTime createdAt;
   final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final timeAgo = _formatTimeAgo(note.createdAt);
+    final timeAgo = _formatTimeAgo(createdAt);
 
     return Container(
       margin: const EdgeInsets.only(bottom: AppSizes.md),
       decoration: BoxDecoration(
-        color: note.color,
+        color: color,
         borderRadius: BorderRadius.circular(AppSizes.radiusLg),
         border: isDark
             ? Border.all(color: AppColors.dividerDark, width: 0.5)
@@ -494,18 +527,20 @@ class _NoteCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Title row ─────────────────────────────
+                // ── Body row ──────────────────────────────
                 Row(
                   children: [
                     Expanded(
                       child: Text(
-                        note.title,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: isDark
-                              ? AppColors.textPrimaryDark
-                              : AppColors.textPrimaryLight,
-                        ),
-                        maxLines: 1,
+                        body,
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: isDark
+                                  ? AppColors.textPrimaryDark
+                                  : AppColors.textPrimaryLight,
+                              height: 1.5,
+                            ),
+                        maxLines: 4,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -542,22 +577,6 @@ class _NoteCard extends StatelessWidget {
                     ),
                   ],
                 ),
-
-                // ── Content ───────────────────────────────
-                if (note.content.isNotEmpty) ...[
-                  const SizedBox(height: AppSizes.xs),
-                  Text(
-                    note.content,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: isDark
-                          ? AppColors.textSecondaryDark
-                          : AppColors.textSecondaryLight,
-                      height: 1.5,
-                    ),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
 
                 const SizedBox(height: AppSizes.sm),
 
