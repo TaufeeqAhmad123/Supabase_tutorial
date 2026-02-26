@@ -5,7 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:supabase_basic/core/constants/app_colors.dart';
 import 'package:supabase_basic/core/constants/app_sizes.dart';
 import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_basic/features/database/database_Service.dart';
+import 'package:supabase_basic/model/note_model.dart';
 
 /// Home screen with a notes list and a FAB that opens
 /// a dialog to add new notes, displayed on the UI.
@@ -17,8 +18,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final titleController = TextEditingController();
-  final contentController = TextEditingController();
   // Predefined card accent colors for visual variety
   static const _cardColors = [
     Color(0xFFE8DEFF), // lavender
@@ -38,11 +37,23 @@ class _HomeScreenState extends State<HomeScreen> {
     Color(0xFF3A3422), // golden dark
   ];
 
-  void _showAddNoteDialog() {
+  // ── Reusable: show note dialog (add or edit) ───────────
+  void _showNoteDialog({
+    String? dialogTitle,
+    IconData? dialogIcon,
+    String? initialTitle,
+    String? initialContent,
+    String? buttonLabel,
+    IconData? buttonIcon,
+    required Future<void> Function(String title, String content) onSave,
+  }) {
+    final titleCtrl = TextEditingController(text: initialTitle ?? '');
+    final contentCtrl = TextEditingController(text: initialContent ?? '');
+
     showGeneralDialog(
       context: context,
       barrierDismissible: true,
-      barrierLabel: 'Add Note',
+      barrierLabel: dialogTitle ?? 'Note',
       barrierColor: Colors.black54,
       transitionDuration: const Duration(milliseconds: 400),
       transitionBuilder: (context, anim1, anim2, child) {
@@ -79,180 +90,47 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── Dialog header ───────────────────────────
-                  Row(
-                    children: [
-                      Container(
-                        width: 44,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
-                          borderRadius: BorderRadius.circular(
-                            AppSizes.radiusMd,
-                          ),
-                        ),
-                        child: const Icon(
-                          Iconsax.note_add,
-                          color: Colors.white,
-                          size: 22,
-                        ),
-                      ),
-                      const SizedBox(width: AppSizes.md),
-                      Text(
-                        'New Note',
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: Icon(
-                          Icons.close_rounded,
-                          color: isDark
-                              ? AppColors.textSecondaryDark
-                              : AppColors.textSecondaryLight,
-                        ),
-                      ),
-                    ],
+                  // ── Dialog header ─────────────────────────
+                  _DialogHeader(
+                    icon: dialogIcon ?? Iconsax.note_add,
+                    title: dialogTitle ?? 'New Note',
                   ),
 
                   const SizedBox(height: AppSizes.lg),
 
-                  // ── Title field ─────────────────────────────
-                  TextField(
-                    controller: titleController,
-                    style: Theme.of(context).textTheme.titleLarge,
-                    cursorColor: AppColors.primary,
-                    decoration: InputDecoration(
-                      hintText: 'Note title',
-                      prefixIcon: const Icon(Iconsax.text, size: 20),
-                      filled: true,
-                      fillColor: isDark
-                          ? AppColors.cardDark
-                          : AppColors.scaffoldLight,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                        borderSide: BorderSide(
-                          color: isDark
-                              ? AppColors.inputBorderDark
-                              : AppColors.inputBorder,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                        borderSide: BorderSide(
-                          color: isDark
-                              ? AppColors.inputBorderDark
-                              : AppColors.inputBorder,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
+                  // ── Title field ───────────────────────────
+                  _NoteTextField(
+                    controller: titleCtrl,
+                    hintText: 'Note title',
+                    prefixIcon: Iconsax.text,
+                    maxLines: 1,
                   ),
 
                   const SizedBox(height: AppSizes.md),
 
-                  // ── Content field ───────────────────────────
-                  TextField(
-                    controller: contentController,
+                  // ── Content field ─────────────────────────
+                  _NoteTextField(
+                    controller: contentCtrl,
+                    hintText: 'Write your note here...',
+                    prefixIcon: Iconsax.edit_2,
                     maxLines: 4,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                    cursorColor: AppColors.primary,
-                    decoration: InputDecoration(
-                      hintText: 'Write your note here...',
-                      alignLabelWithHint: true,
-                      prefixIcon: const Padding(
-                        padding: EdgeInsets.only(bottom: 60),
-                        child: Icon(Iconsax.edit_2, size: 20),
-                      ),
-                      filled: true,
-                      fillColor: isDark
-                          ? AppColors.cardDark
-                          : AppColors.scaffoldLight,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                        borderSide: BorderSide(
-                          color: isDark
-                              ? AppColors.inputBorderDark
-                              : AppColors.inputBorder,
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                        borderSide: BorderSide(
-                          color: isDark
-                              ? AppColors.inputBorderDark
-                              : AppColors.inputBorder,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                        borderSide: const BorderSide(
-                          color: AppColors.primary,
-                          width: 1.5,
-                        ),
-                      ),
-                    ),
+                    alignIconTop: true,
                   ),
 
                   const SizedBox(height: AppSizes.lg),
 
-                  // ── Save button ─────────────────────────────
-                  SizedBox(
-                    width: double.infinity,
-                    height: AppSizes.buttonHeight,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: AppColors.primaryGradient,
-                        borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.35),
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: MaterialButton(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppSizes.radiusLg,
-                          ),
-                        ),
-                        onPressed: () {
-                          final title = titleController.text.trim();
-                          final content = contentController.text.trim();
-                          if (title.isEmpty && content.isEmpty) return;
+                  // ── Action button ─────────────────────────
+                  _GradientButton(
+                    icon: buttonIcon ?? Iconsax.add_circle,
+                    label: buttonLabel ?? 'Save Note',
+                    onPressed: () async {
+                      final title = titleCtrl.text.trim();
+                      final content = contentCtrl.text.trim();
+                      if (title.isEmpty && content.isEmpty) return;
 
-                          addNotes();
-                          Navigator.pop(context);
-                        },
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Iconsax.add_circle,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            SizedBox(width: AppSizes.sm),
-                            Text(
-                              'Save Note',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                      await onSave(title, content);
+                      Navigator.pop(context);
+                    },
                   ),
                 ],
               ),
@@ -263,15 +141,40 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void addNotes() async {
-    await Supabase.instance.client.from('Notes').insert({
-      'body': contentController.text.trim(),
-    });
+  void _showAddNoteDialog() {
+    _showNoteDialog(
+      dialogTitle: 'New Note',
+      dialogIcon: Iconsax.note_add,
+      buttonLabel: 'Save Note',
+      buttonIcon: Iconsax.add_circle,
+      onSave: (title, content) async {
+        await DatabaseService().addNote(
+          NoteModel(title: title, content: content),
+        );
+      },
+    );
   }
 
-  final _noteStream = Supabase.instance.client
-      .from('Notes')
-      .stream(primaryKey: ['id']);
+  void _showEditNoteDialog({
+    required dynamic noteId,
+    required String currentTitle,
+    required String currentContent,
+  }) {
+    _showNoteDialog(
+      dialogTitle: 'Edit Note',
+      dialogIcon: Iconsax.edit,
+      initialTitle: currentTitle,
+      initialContent: currentContent,
+      buttonLabel: 'Update Note',
+      buttonIcon: Iconsax.tick_circle,
+      onSave: (title, content) async {
+        await DatabaseService().updateNote(
+          NoteModel(id: noteId, title: title, content: content),
+          content,
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -410,8 +313,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Notes list — a staggered card layout.
   Widget _buildNotesList(BuildContext context) {
-    return StreamBuilder<List<Map<String, dynamic>>>(
-      stream: _noteStream,
+    return StreamBuilder<List<NoteModel>>(
+      stream: DatabaseService().stream,
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
@@ -433,7 +336,6 @@ class _HomeScreenState extends State<HomeScreen> {
           itemCount: notes.length,
           itemBuilder: (context, index) {
             final noteData = notes[index];
-            final body = noteData['body'] as String? ?? '';
             final isDark = Theme.of(context).brightness == Brightness.dark;
             final color = isDark
                 ? _cardColorsDark[index % _cardColorsDark.length]
@@ -443,21 +345,25 @@ class _HomeScreenState extends State<HomeScreen> {
               delay: Duration(milliseconds: 80 * index),
               duration: const Duration(milliseconds: 500),
               child: _NoteCard(
-                body: body,
+                title: noteData.title,
+                content: noteData.content,
                 color: color,
-                createdAt:
-                    DateTime.tryParse(
-                      noteData['created_at']?.toString() ?? '',
+                createdAt: DateTime.tryParse(
+                      noteData.createdAt?.toString() ?? '',
                     ) ??
                     DateTime.now(),
                 onDelete: () async {
-                  final id = noteData['id'];
+                  final id = noteData.id;
                   if (id != null) {
-                    await Supabase.instance.client
-                        .from('Notes')
-                        .delete()
-                        .eq('id', id);
+                    await DatabaseService().deleteNote(id);
                   }
+                },
+                onUpdate: () {
+                  _showEditNoteDialog(
+                    noteId: noteData.id,
+                    currentTitle: noteData.title,
+                    currentContent: noteData.content,
+                  );
                 },
               ),
             );
@@ -468,19 +374,183 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+// ═══════════════════════════════════════════════════════════
+//  REUSABLE WIDGETS
+// ═══════════════════════════════════════════════════════════
+
+/// Reusable styled text field for note dialogs.
+class _NoteTextField extends StatelessWidget {
+  const _NoteTextField({
+    required this.controller,
+    required this.hintText,
+    required this.prefixIcon,
+    this.maxLines = 1,
+    this.alignIconTop = false,
+  });
+
+  final TextEditingController controller;
+  final String hintText;
+  final IconData prefixIcon;
+  final int maxLines;
+  final bool alignIconTop;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      style: maxLines == 1
+          ? Theme.of(context).textTheme.titleLarge
+          : Theme.of(context).textTheme.bodyLarge,
+      cursorColor: AppColors.primary,
+      decoration: InputDecoration(
+        hintText: hintText,
+        alignLabelWithHint: alignIconTop,
+        prefixIcon: alignIconTop
+            ? Padding(
+                padding: EdgeInsets.only(bottom: (maxLines - 1) * 20.0),
+                child: Icon(prefixIcon, size: 20),
+              )
+            : Icon(prefixIcon, size: 20),
+        filled: true,
+        fillColor: isDark ? AppColors.cardDark : AppColors.scaffoldLight,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+          borderSide: BorderSide(
+            color: isDark ? AppColors.inputBorderDark : AppColors.inputBorder,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+          borderSide: BorderSide(
+            color: isDark ? AppColors.inputBorderDark : AppColors.inputBorder,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+          borderSide: const BorderSide(
+            color: AppColors.primary,
+            width: 1.5,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Reusable dialog header with gradient icon + title + close button.
+class _DialogHeader extends StatelessWidget {
+  const _DialogHeader({required this.icon, required this.title});
+
+  final IconData icon;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Row(
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            gradient: AppColors.primaryGradient,
+            borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+          ),
+          child: Icon(icon, color: Colors.white, size: 22),
+        ),
+        const SizedBox(width: AppSizes.md),
+        Text(title, style: Theme.of(context).textTheme.headlineSmall),
+        const Spacer(),
+        IconButton(
+          onPressed: () => Navigator.pop(context),
+          icon: Icon(
+            Icons.close_rounded,
+            color: isDark
+                ? AppColors.textSecondaryDark
+                : AppColors.textSecondaryLight,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Reusable gradient action button.
+class _GradientButton extends StatelessWidget {
+  const _GradientButton({
+    required this.icon,
+    required this.label,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: AppSizes.buttonHeight,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: AppColors.primaryGradient,
+          borderRadius: BorderRadius.circular(AppSizes.radiusLg),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.35),
+              blurRadius: 16,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: MaterialButton(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppSizes.radiusLg),
+          ),
+          onPressed: onPressed,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: Colors.white, size: 20),
+              const SizedBox(width: AppSizes.sm),
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// A premium-styled note card.
 class _NoteCard extends StatelessWidget {
   const _NoteCard({
-    required this.body,
+    required this.title,
+    required this.content,
     required this.color,
     required this.createdAt,
     required this.onDelete,
+    required this.onUpdate,
   });
 
-  final String body;
+  final String title;
+  final String content;
   final Color color;
   final DateTime createdAt;
   final VoidCallback onDelete;
+  final VoidCallback onUpdate;
 
   @override
   Widget build(BuildContext context) {
@@ -515,20 +585,21 @@ class _NoteCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // ── Body row ──────────────────────────────
+                // ── Title + menu ──────────────────────────
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: Text(
-                        body,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: isDark
-                                  ? AppColors.textPrimaryDark
-                                  : AppColors.textPrimaryLight,
-                              height: 1.5,
-                            ),
-                        maxLines: 4,
+                        title,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: isDark
+                                      ? AppColors.textPrimaryDark
+                                      : AppColors.textPrimaryLight,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -541,21 +612,31 @@ class _NoteCard extends StatelessWidget {
                         size: 20,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppSizes.radiusMd),
+                        borderRadius:
+                            BorderRadius.circular(AppSizes.radiusMd),
                       ),
                       onSelected: (value) {
                         if (value == 'delete') onDelete();
+                        if (value == 'update') onUpdate();
                       },
                       itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'update',
+                          child: Row(
+                            children: [
+                              Icon(Iconsax.edit, size: 18,
+                                  color: AppColors.primary),
+                              SizedBox(width: AppSizes.sm),
+                              Text('Update'),
+                            ],
+                          ),
+                        ),
                         const PopupMenuItem(
                           value: 'delete',
                           child: Row(
                             children: [
-                              Icon(
-                                Iconsax.trash,
-                                size: 18,
-                                color: AppColors.error,
-                              ),
+                              Icon(Iconsax.trash, size: 18,
+                                  color: AppColors.error),
                               SizedBox(width: AppSizes.sm),
                               Text('Delete'),
                             ],
@@ -565,6 +646,22 @@ class _NoteCard extends StatelessWidget {
                     ),
                   ],
                 ),
+
+                // ── Content ──────────────────────────────
+                if (content.isNotEmpty) ...[
+                  const SizedBox(height: AppSizes.xs),
+                  Text(
+                    content,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: isDark
+                              ? AppColors.textSecondaryDark
+                              : AppColors.textSecondaryLight,
+                          height: 1.5,
+                        ),
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
 
                 const SizedBox(height: AppSizes.sm),
 
@@ -576,18 +673,20 @@ class _NoteCard extends StatelessWidget {
                       size: 14,
                       color: isDark
                           ? AppColors.textSecondaryDark.withValues(alpha: 0.6)
-                          : AppColors.textSecondaryLight.withValues(alpha: 0.6),
+                          : AppColors.textSecondaryLight
+                              .withValues(alpha: 0.6),
                     ),
                     const SizedBox(width: 4),
                     Text(
                       timeAgo,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: isDark
-                            ? AppColors.textSecondaryDark.withValues(alpha: 0.6)
-                            : AppColors.textSecondaryLight.withValues(
-                                alpha: 0.6,
+                      style:
+                          Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: isDark
+                                    ? AppColors.textSecondaryDark
+                                        .withValues(alpha: 0.6)
+                                    : AppColors.textSecondaryLight
+                                        .withValues(alpha: 0.6),
                               ),
-                      ),
                     ),
                   ],
                 ),
