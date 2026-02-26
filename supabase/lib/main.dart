@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_basic/core/constants/api_key.dart';
 import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
 import 'package:supabase_basic/features/auth/provider/login_provider.dart';
+import 'package:supabase_basic/features/auth/provider/note_provider.dart';
 import 'package:supabase_basic/features/auth/provider/signup_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/theme/app_theme.dart';
@@ -39,6 +40,7 @@ class LuxeApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => LoginProvider()),
         ChangeNotifierProvider(create: (_) => SignUpProvider()),
+        ChangeNotifierProvider(create: (_) => NoteProvider()),
       ],
       child: MaterialApp(
         title: 'Luxe',

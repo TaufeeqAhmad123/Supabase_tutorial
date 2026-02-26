@@ -3,33 +3,34 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DatabaseService {
   final SupabaseClient _supabase = Supabase.instance.client;
+  final String tableName = 'Notes';
 
   Future<void> addNote(NoteModel note) async {
     try {
-      await _supabase.from('Notes').insert(note.toMap());
+      await _supabase.from(tableName).insert(note.toInsertJson());
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 
   Stream<List<NoteModel>> get stream => _supabase
-      .from('Notes')
+      .from(tableName)
       .stream(primaryKey: ['id'])
       .map((data) => data.map((e) => NoteModel.fromMap(e)).toList());
 
-  Future<void> updateNote(NoteModel note,String content) async {
+  Future<void> updateNote(NoteModel note, String id) async {
     try {
-      await _supabase.from('Notes').update({'content':content}).eq('id', note.id as Object);
+      await _supabase.from(tableName).update(note.toUpdateJson()).eq('id', id);
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 
-  Future<void> deleteNote(int id) async {
+  Future<void> deleteNote(String id) async {
     try {
-      await _supabase.from('Notes').delete().eq('id', id);
+      await _supabase.from(tableName).delete().eq('id', id);
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 }
