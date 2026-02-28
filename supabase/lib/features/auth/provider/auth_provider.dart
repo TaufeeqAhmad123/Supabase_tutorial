@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_basic/features/auth/authService/auth_service.dart';
+import 'package:supabase_basic/model/model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Handles global auth state: current user, auth stream, and sign out.
@@ -7,8 +8,18 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
 
+  // ── Profile state ─────────────────────────────────────────
+  Profile? _currentProfile;
+  Profile? get currentProfile => _currentProfile;
+
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+
   /// Current user's email (null if not logged in)
   String? get currentUserEmail => _authService.getCurrentUser();
+
+  /// Current user's ID
+  String? get currentUserId => _authService.user?.id;
 
   /// Auth state changes stream (used by AuthGate)
   Stream<User?> get authStateChanges => _authService.authStateChanges;
@@ -17,10 +28,25 @@ class AuthProvider extends ChangeNotifier {
   Future<void> signOut() async {
     try {
       await _authService.signOut();
+      _currentProfile = null;
+      notifyListeners();
     } catch (e) {
       debugPrint('Sign out error: $e');
     }
-    notifyListeners();
   }
-  
+
+  // ── Get Profile ─────────────────────────────────────────
+  Future<void> getProfile(String id) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      _currentProfile = await _authService.getProfile(id);
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Get profile error: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

@@ -6,6 +6,7 @@ import 'package:supabase_basic/core/constants/app_colors.dart';
 import 'package:supabase_basic/core/constants/app_sizes.dart';
 import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
 import 'package:supabase_basic/features/auth/provider/note_provider.dart';
+import 'package:supabase_basic/features/home/screens/profile_screen.dart';
 import 'package:supabase_basic/features/home/widget/notes_list.dart';
 import 'package:supabase_basic/features/home/widget/show_note_dialog.dart';
 import 'package:supabase_basic/model/note_model.dart';
@@ -20,6 +21,19 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Fetch the user's profile on load
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final userId = authProvider.currentUserId;
+      if (userId != null) {
+        authProvider.getProfile(userId);
+      }
+    });
+  }
+
   // ── Show Add Note Dialog ─────────────────────────────────
   void _showAddNoteDialog() {
     showNoteDialog(
@@ -54,7 +68,12 @@ class _HomeScreenState extends State<HomeScreen> {
       onSave: (title, content) async {
         final noteProvider = Provider.of<NoteProvider>(context, listen: false);
         await noteProvider.updateNote(
-          NoteModel(id: noteId, title: title, content: content, createdAt: DateTime.now()),
+          NoteModel(
+            id: noteId,
+            title: title,
+            content: content,
+            createdAt: DateTime.now(),
+          ),
           noteId.toString(),
         );
       },
@@ -105,16 +124,54 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: const Icon(Iconsax.search_normal_1, size: 22),
             ),
           ),
+          // ── Profile Avatar ────────────────────────────
           FadeInDown(
             delay: const Duration(milliseconds: 300),
             duration: const Duration(milliseconds: 500),
             child: Padding(
               padding: const EdgeInsets.only(right: AppSizes.sm),
-              child: IconButton(
-                onPressed: () {
-                  Provider.of<AuthProvider>(context, listen: false).signOut();
+              child: Consumer<AuthProvider>(
+                builder: (context, authProvider, _) {
+                  final profile = authProvider.currentProfile;
+                  final name = profile?.name ?? 'U';
+                  final initial = name.isNotEmpty ? name[0].toUpperCase() : 'U';
+
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ProfileScreen(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        gradient: AppColors.primaryGradient,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Text(
+                          initial,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
                 },
-                icon: const Icon(Iconsax.logout, size: 22),
               ),
             ),
           ),
@@ -123,17 +180,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // ── Body ────────────────────────────────────────────
       body: NotesList(
-        onEditNote: ({
-          required noteId,
-          required currentTitle,
-          required currentContent,
-        }) {
-          _showEditNoteDialog(
-            noteId: noteId,
-            currentTitle: currentTitle,
-            currentContent: currentContent,
-          );
-        },
+        onEditNote:
+            ({
+              required noteId,
+              required currentTitle,
+              required currentContent,
+            }) {
+              _showEditNoteDialog(
+                noteId: noteId,
+                currentTitle: currentTitle,
+                currentContent: currentContent,
+              );
+            },
       ),
 
       // ── FAB ─────────────────────────────────────────────

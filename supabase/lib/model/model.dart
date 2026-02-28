@@ -16,4 +16,12 @@ class Profile {
       name: json['name'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'email': email,
+      'name': name,
+    };
+  }
 }

@@ -31,16 +31,18 @@ class AuthService {
     }
 
     // Insert into the 'profiles' table in Supabase
-    await _supabase.from('profile').insert({
+   final data= await _supabase.from('profile').insert({
       'id': user!.id,
       'email': email,
       'name': name,
     });
 
-    return Profile(id: user!.id, email: email, name: name);
+    return Profile.fromJson(
+      data
+  ); 
   }
 
-  Future<Profile> getProfile() async {
+  Future<Profile> getProfile(String id) async {
     try {
       if (user == null) {
         throw AuthException('User not found');
@@ -49,9 +51,9 @@ class AuthService {
       final data = await _supabase
           .from('profile')
           .select()
-          .eq('id', user!.id)
+          .eq('id', id)
           .single();
-      return Profile(id: data['id'], email: data['email'], name: data['name']);
+      return Profile.fromJson(data);
     } catch (e) {
       throw AuthException(e.toString());
     }
