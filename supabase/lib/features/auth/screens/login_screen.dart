@@ -13,6 +13,7 @@ import 'package:supabase_basic/core/widgets/custom_button.dart'
 import 'package:supabase_basic/core/widgets/custom_text_field.dart';
 import 'package:supabase_basic/core/widgets/or_divider.dart';
 import 'package:supabase_basic/core/widgets/social_login_button.dart';
+import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
 import 'package:supabase_basic/features/auth/provider/login_provider.dart';
 import 'package:supabase_basic/features/auth/screens/welcome_screen.dart';
 import 'signup_screen.dart';
@@ -24,6 +25,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final authProvider = Provider.of<AuthProvider>(context);
 
     return Scaffold(
       body: SafeArea(
@@ -141,7 +143,7 @@ class LoginScreen extends StatelessWidget {
                         label: AppStrings.google,
                         icon: Icons.g_mobiledata_rounded,
                         iconColor: Colors.red,
-                        onPressed: () {},
+                        onPressed: () => authProvider.signInWithGoogle(),
                       ),
                     ),
                     const SizedBox(width: AppSizes.md),

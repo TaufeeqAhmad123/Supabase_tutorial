@@ -24,6 +24,21 @@ class AuthProvider extends ChangeNotifier {
   /// Auth state changes stream (used by AuthGate)
   Stream<User?> get authStateChanges => _authService.authStateChanges;
 
+  //signin with google
+  Future<void> signInWithGoogle() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _authService.signInWithGoogle();
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Sign in with Google error: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // ── Sign Out ───────────────────────────────────────────
   Future<void> signOut() async {
     try {

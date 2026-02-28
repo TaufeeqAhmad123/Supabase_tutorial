@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_basic/core/constants/api_key.dart';
 import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
@@ -16,6 +20,14 @@ void main() async {
   await Supabase.initialize(
     url: ApiKey.supabaseUrl,
     anonKey: ApiKey.supabaseAnonKey,
+  );
+
+  await GoogleSignIn.instance.initialize(
+    serverClientId:
+        '95617885526-841gdvne6k4hp8ncvg1o0vs4oo5ks536.apps.googleusercontent.com',
+    clientId: Platform.isAndroid
+        ? '95617885526-ba36ubu0u4sdupbaqa8nvh1862h8cngb.apps.googleusercontent.com'
+        : '95617885526-sb67ed09p3a5pdmsrmh9ojakcidb9727.apps.googleusercontent.com',
   );
 
   // Set system UI overlay style for a polished feel

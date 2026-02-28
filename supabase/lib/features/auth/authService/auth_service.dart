@@ -1,3 +1,8 @@
+import 'dart:io';
+
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_basic/model/model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,6 +29,45 @@ class AuthService {
     return await _supabase.auth.signUp(email: email, password: password);
   }
 
+  //Signinwith Google
+  Future<AuthResponse> signInWithGoogle() async {
+    try {
+      GoogleSignIn signIn = GoogleSignIn.instance;
+      // await signIn.initialize(
+      //   serverClientId: dotenv.env["Web_ClintID"],
+      //   clientId: Platform.isAndroid
+      //       ? dotenv.env["Android_ClintID"]
+      //       : dotenv.env["IOS_ClintID"],
+      // );
+      GoogleSignInAccount googleAccount = await signIn.authenticate();
+      String idToken = googleAccount.authentication.idToken ?? '';
+      final auth =
+          await googleAccount.authorizationClient.authorizationForScopes([
+            'email',
+            'openid',
+            'profile',
+          ]) ??
+          await googleAccount.authorizationClient.authorizeScopes([
+            'email',
+            'openid',
+            'profile',
+          ]);
+      final AuthResponse response = await _supabase.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
+        accessToken: auth?.accessToken,
+      );
+      final User? user = response.user;
+      if (user != null) {
+        await createProfile(user.email!, googleAccount.displayName ?? '');
+      }
+      return response;
+    } catch (e) {
+      print(e);
+      rethrow;
+    }
+  }
+
   // Create profile and store it in Supabase
   Future<Profile> createProfile(String name, String email) async {
     if (user == null) {
@@ -31,15 +75,13 @@ class AuthService {
     }
 
     // Insert into the 'profiles' table in Supabase
-   final data= await _supabase.from('profile').insert({
+    final data = await _supabase.from('profiles').insert({
       'id': user!.id,
       'email': email,
       'name': name,
     });
 
-    return Profile.fromJson(
-      data
-  ); 
+    return Profile.fromJson(data);
   }
 
   Future<Profile> getProfile(String id) async {
