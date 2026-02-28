@@ -75,10 +75,22 @@ class SignUpProvider extends ChangeNotifier {
         emailController.text.trim(),
         passwordController.text.trim(),
       );
-      await _authService.createProfile(
-        nameController.text.trim(),
-        emailController.text.trim(),
-      );
+
+      // Check if profile already exists (e.g. user previously signed in with Google)
+      final user = _authService.user;
+      if (user != null) {
+        final existingProfile = await _authService.getProfile(user.id);
+        if (existingProfile == null) {
+          // No profile yet, create one
+          await _authService.createProfile(
+            nameController.text.trim(),
+            emailController.text.trim(),
+            '', // no avatar for email sign-up
+            'email', // provider
+          );
+        }
+      }
+
       _isLoading = false;
       notifyListeners();
       return true;
@@ -89,12 +101,11 @@ class SignUpProvider extends ChangeNotifier {
       return false;
     } catch (e) {
       _errorMessage = e.toString();
-       print(e);
-       
+      print(e);
+
       _isLoading = false;
       notifyListeners();
       return false;
-     
     }
   }
 

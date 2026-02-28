@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Consumer<AuthProvider>(
                 builder: (context, authProvider, _) {
                   final profile = authProvider.currentProfile;
-                  final name = profile?.name ?? 'U';
+                  final name = profile?.full_name ?? 'U';
                   final initial = name.isNotEmpty ? name[0].toUpperCase() : 'U';
 
                   return GestureDetector(
@@ -159,7 +159,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ],
                       ),
-                      child: Center(
+                      child: (profile != null && profile.avatar_url.isNotEmpty)
+                      ?CircleAvatar(
+                        backgroundImage: NetworkImage(profile.avatar_url),
+                      )
+                      :Center(
                         child: Text(
                           initial,
                           style: const TextStyle(

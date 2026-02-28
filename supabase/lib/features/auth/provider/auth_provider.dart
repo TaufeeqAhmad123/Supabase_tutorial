@@ -30,6 +30,11 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       await _authService.signInWithGoogle();
+      // Fetch the profile right after sign-in
+      final userId = _authService.user?.id;
+      if (userId != null) {
+        _currentProfile = await _authService.getProfile(userId);
+      }
       notifyListeners();
     } catch (e) {
       debugPrint('Sign in with Google error: $e');

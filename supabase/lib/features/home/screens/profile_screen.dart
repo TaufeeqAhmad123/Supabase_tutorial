@@ -43,7 +43,7 @@ class ProfileScreen extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final name = profile?.name ?? 'User';
+          final name = profile?.full_name ?? 'User';
           final email = profile?.email ?? authProvider.currentUserEmail ?? '';
           final initials = _getInitials(name);
 
@@ -70,17 +70,22 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: Center(
-                      child: Text(
-                        initials,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 42,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                    ),
+                    child: (profile != null && profile.avatar_url.isNotEmpty)
+                        ? CircleAvatar(
+                            radius: 60,
+                            backgroundImage: NetworkImage(profile.avatar_url),
+                          )
+                        : Center(
+                            child: Text(
+                              initials,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 42,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ),
                   ),
                 ),
 
