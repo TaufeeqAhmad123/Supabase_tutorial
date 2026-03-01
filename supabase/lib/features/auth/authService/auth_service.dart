@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_basic/model/model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -95,7 +96,15 @@ class AuthService {
     await _supabase.from('profiles').upsert(profileData);
     return Profile.fromJson(profileData);
   }
-
+// login with facebook
+Future<void> signInWithFacebook() async {
+  await _supabase.auth.signInWithOAuth(
+    OAuthProvider.facebook,
+    redirectTo: 'devcode://fblogin',
+    authScreenLaunchMode:
+        LaunchMode.externalApplication, // Launch the auth screen in a new webview on mobile.
+  );
+}
   Future<Profile?> getProfile(String id) async {
     try {
       if (user == null) {

@@ -5,18 +5,32 @@ import 'package:provider/provider.dart';
 import 'package:supabase_basic/core/constants/app_colors.dart';
 import 'package:supabase_basic/core/constants/app_sizes.dart';
 import 'package:supabase_basic/core/constants/app_strings.dart';
+import 'package:supabase_basic/core/utils/deepLink.dart';
 import 'package:supabase_basic/core/widgets/auth_header.dart';
 import 'package:supabase_basic/core/widgets/custom_button.dart';
 import 'package:supabase_basic/core/widgets/custom_text_field.dart';
+import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
 import 'package:supabase_basic/features/auth/provider/signup_provider.dart';
 
 /// Sign Up screen — pure UI, all logic lives in SignUpProvider.
-class SignUpScreen extends StatelessWidget {
+class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
   @override
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
+
+class _SignUpScreenState extends State<SignUpScreen> {
+  @override
+  void initState() {
+    super.initState();
+    deepLink(context: context);
+  }
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final authProvider = Provider.of<AuthProvider>(context);
+    final signupProvider = Provider.of<SignUpProvider>(context);
 
     return Scaffold(
       body: SafeArea(
@@ -64,18 +78,14 @@ class SignUpScreen extends StatelessWidget {
               FadeInUp(
                 delay: const Duration(milliseconds: 400),
                 duration: const Duration(milliseconds: 600),
-                child: Consumer<SignUpProvider>(
-                  builder: (context, signUpProv, _) {
-                    return CustomTextField(
+                child: CustomTextField(
                       hintText: AppStrings.fullName,
                       prefixIcon: Iconsax.user,
-                      controller: signUpProv.nameController,
+                      controller: signupProvider.nameController,
                       keyboardType: TextInputType.name,
                       textInputAction: TextInputAction.next,
-                      errorText: signUpProv.nameError,
-                    );
-                  },
-                ),
+                      errorText: signupProvider.nameError,
+                    ),
               ),
               const SizedBox(height: AppSizes.md),
 
@@ -83,18 +93,14 @@ class SignUpScreen extends StatelessWidget {
               FadeInUp(
                 delay: const Duration(milliseconds: 500),
                 duration: const Duration(milliseconds: 600),
-                child: Consumer<SignUpProvider>(
-                  builder: (context, signUpProv, _) {
-                    return CustomTextField(
+                child: CustomTextField(
                       hintText: AppStrings.email,
                       prefixIcon: Iconsax.sms,
-                      controller: signUpProv.emailController,
+                      controller: signupProvider.emailController,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
-                      errorText: signUpProv.emailError,
-                    );
-                  },
-                ),
+                      errorText: signupProvider.emailError,
+                    ),
               ),
               const SizedBox(height: AppSizes.md),
 
@@ -102,18 +108,14 @@ class SignUpScreen extends StatelessWidget {
               FadeInUp(
                 delay: const Duration(milliseconds: 600),
                 duration: const Duration(milliseconds: 600),
-                child: Consumer<SignUpProvider>(
-                  builder: (context, signUpProv, _) {
-                    return CustomTextField(
+                child: CustomTextField(
                       hintText: AppStrings.password,
                       prefixIcon: Iconsax.lock,
                       isPassword: true,
-                      controller: signUpProv.passwordController,
+                      controller: signupProvider.passwordController,
                       textInputAction: TextInputAction.next,
-                      errorText: signUpProv.passwordError,
-                    );
-                  },
-                ),
+                      errorText: signupProvider.passwordError,
+                    ),
               ),
               const SizedBox(height: AppSizes.md),
 
@@ -121,18 +123,14 @@ class SignUpScreen extends StatelessWidget {
               FadeInUp(
                 delay: const Duration(milliseconds: 700),
                 duration: const Duration(milliseconds: 600),
-                child: Consumer<SignUpProvider>(
-                  builder: (context, signUpProv, _) {
-                    return CustomTextField(
+                child: CustomTextField(
                       hintText: AppStrings.confirmPassword,
                       prefixIcon: Iconsax.lock_1,
                       isPassword: true,
-                      controller: signUpProv.confirmPasswordController,
+                      controller: signupProvider.confirmPasswordController,
                       textInputAction: TextInputAction.done,
-                      errorText: signUpProv.confirmPasswordError,
-                    );
-                  },
-                ),
+                      errorText: signupProvider.confirmPasswordError,
+                    ),
               ),
               const SizedBox(height: AppSizes.xl),
 
@@ -140,16 +138,14 @@ class SignUpScreen extends StatelessWidget {
               FadeInUp(
                 delay: const Duration(milliseconds: 800),
                 duration: const Duration(milliseconds: 600),
-                child: Consumer<SignUpProvider>(
-                  builder: (context, signUpProv, _) {
-                    return CustomButton(
+                child: CustomButton(
                       text: AppStrings.createAccount,
                       onPressed: () async {
-                        final success = await signUpProv.handleSignUp();
+                        final success = await signupProvider.handleSignUp();
                         if (!success && context.mounted) {
-                          if (signUpProv.errorMessage != null) {
+                          if (signupProvider.errorMessage != null) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(signUpProv.errorMessage!)),
+                              SnackBar(content: Text(signupProvider.errorMessage!)),
                                 
                             );
                           }
@@ -160,10 +156,8 @@ class SignUpScreen extends StatelessWidget {
                           ).popUntil((route) => route.isFirst);
                         }
                       },
-                      isLoading: signUpProv.isLoading,
-                    );
-                  },
-                ),
+                      isLoading: signupProvider.isLoading,
+                    ),
               ),
 
               const SizedBox(height: AppSizes.lg),
