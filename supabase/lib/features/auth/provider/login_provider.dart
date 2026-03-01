@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_basic/features/auth/authService/auth_service.dart';
+import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginProvider extends ChangeNotifier {
@@ -45,7 +46,7 @@ class LoginProvider extends ChangeNotifier {
   }
 
   // ── Handle Login ────────────────────────────────────────
-  Future<bool> handleLogin() async {
+  Future<bool> handleLogin(AuthProvider authProvider) async {
     if (!_validate()) return false;
 
     _isLoading = true;
@@ -57,6 +58,16 @@ class LoginProvider extends ChangeNotifier {
         emailController.text.trim(),
         passwordController.text.trim(),
       );
+
+      // Fetch and set profile immediately so it's available on HomeScreen
+      final user = _authService.user;
+      if (user != null) {
+        final profile = await _authService.getProfile(user.id);
+        if (profile != null) {
+          authProvider.setProfile(profile);
+        }
+      }
+
       _isLoading = false;
       notifyListeners();
       return true;

@@ -89,4 +89,10 @@ class AuthProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  // ── Set Profile (used after signup/login to avoid stale state) ──
+  void setProfile(Profile profile) {
+    _currentProfile = profile;
+    notifyListeners();
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_basic/features/auth/authService/auth_service.dart';
+import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SignUpProvider extends ChangeNotifier {
@@ -63,7 +64,7 @@ class SignUpProvider extends ChangeNotifier {
   }
 
   // ── Handle Sign Up ──────────────────────────────────────
-  Future<bool> handleSignUp() async {
+  Future<bool> handleSignUp(AuthProvider authProvider) async {
     if (!_validate()) return false;
 
     _isLoading = true;
@@ -82,12 +83,18 @@ class SignUpProvider extends ChangeNotifier {
         final existingProfile = await _authService.getProfile(user.id);
         if (existingProfile == null) {
           // No profile yet, create one
-          await _authService.createProfile(
+          final newProfile = await _authService.createProfile(
             nameController.text.trim(),
             emailController.text.trim(),
             '', // no avatar for email sign-up
             'email', // provider
           );
+          // Immediately set the profile on AuthProvider so it's
+          // available before HomeScreen loads (avoids showing 'User').
+          authProvider.setProfile(newProfile);
+        } else {
+          // Profile already exists, set it on AuthProvider
+          authProvider.setProfile(existingProfile);
         }
       }
 

@@ -105,7 +105,9 @@ class LoginScreen extends StatelessWidget {
                     return CustomButton(
                       text: AppStrings.login,
                       onPressed: () async {
-                        final success = await loginProv.handleLogin();
+                        final success = await loginProv.handleLogin(
+                          authProvider,
+                        );
                         if (!success && context.mounted) {
                           if (loginProv.errorMessage != null) {
                             ScaffoldMessenger.of(context).showSnackBar(

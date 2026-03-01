@@ -26,6 +26,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     super.initState();
     deepLink(context: context);
   }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -79,13 +80,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 delay: const Duration(milliseconds: 400),
                 duration: const Duration(milliseconds: 600),
                 child: CustomTextField(
-                      hintText: AppStrings.fullName,
-                      prefixIcon: Iconsax.user,
-                      controller: signupProvider.nameController,
-                      keyboardType: TextInputType.name,
-                      textInputAction: TextInputAction.next,
-                      errorText: signupProvider.nameError,
-                    ),
+                  hintText: AppStrings.fullName,
+                  prefixIcon: Iconsax.user,
+                  controller: signupProvider.nameController,
+                  keyboardType: TextInputType.name,
+                  textInputAction: TextInputAction.next,
+                  errorText: signupProvider.nameError,
+                ),
               ),
               const SizedBox(height: AppSizes.md),
 
@@ -94,13 +95,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 delay: const Duration(milliseconds: 500),
                 duration: const Duration(milliseconds: 600),
                 child: CustomTextField(
-                      hintText: AppStrings.email,
-                      prefixIcon: Iconsax.sms,
-                      controller: signupProvider.emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      errorText: signupProvider.emailError,
-                    ),
+                  hintText: AppStrings.email,
+                  prefixIcon: Iconsax.sms,
+                  controller: signupProvider.emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  errorText: signupProvider.emailError,
+                ),
               ),
               const SizedBox(height: AppSizes.md),
 
@@ -109,13 +110,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 delay: const Duration(milliseconds: 600),
                 duration: const Duration(milliseconds: 600),
                 child: CustomTextField(
-                      hintText: AppStrings.password,
-                      prefixIcon: Iconsax.lock,
-                      isPassword: true,
-                      controller: signupProvider.passwordController,
-                      textInputAction: TextInputAction.next,
-                      errorText: signupProvider.passwordError,
-                    ),
+                  hintText: AppStrings.password,
+                  prefixIcon: Iconsax.lock,
+                  isPassword: true,
+                  controller: signupProvider.passwordController,
+                  textInputAction: TextInputAction.next,
+                  errorText: signupProvider.passwordError,
+                ),
               ),
               const SizedBox(height: AppSizes.md),
 
@@ -124,13 +125,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 delay: const Duration(milliseconds: 700),
                 duration: const Duration(milliseconds: 600),
                 child: CustomTextField(
-                      hintText: AppStrings.confirmPassword,
-                      prefixIcon: Iconsax.lock_1,
-                      isPassword: true,
-                      controller: signupProvider.confirmPasswordController,
-                      textInputAction: TextInputAction.done,
-                      errorText: signupProvider.confirmPasswordError,
-                    ),
+                  hintText: AppStrings.confirmPassword,
+                  prefixIcon: Iconsax.lock_1,
+                  isPassword: true,
+                  controller: signupProvider.confirmPasswordController,
+                  textInputAction: TextInputAction.done,
+                  errorText: signupProvider.confirmPasswordError,
+                ),
               ),
               const SizedBox(height: AppSizes.xl),
 
@@ -139,25 +140,24 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 delay: const Duration(milliseconds: 800),
                 duration: const Duration(milliseconds: 600),
                 child: CustomButton(
-                      text: AppStrings.createAccount,
-                      onPressed: () async {
-                        final success = await signupProvider.handleSignUp();
-                        if (!success && context.mounted) {
-                          if (signupProvider.errorMessage != null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(signupProvider.errorMessage!)),
-                                
-                            );
-                          }
-                        } else if (success && context.mounted) {
-                          // Pop all screens back to AuthGate
-                          Navigator.of(
-                            context,
-                          ).popUntil((route) => route.isFirst);
-                        }
-                      },
-                      isLoading: signupProvider.isLoading,
-                    ),
+                  text: AppStrings.createAccount,
+                  onPressed: () async {
+                    final success = await signupProvider.handleSignUp(
+                      authProvider,
+                    );
+                    if (!success && context.mounted) {
+                      if (signupProvider.errorMessage != null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(signupProvider.errorMessage!)),
+                        );
+                      }
+                    } else if (success && context.mounted) {
+                      // Pop all screens back to AuthGate
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    }
+                  },
+                  isLoading: signupProvider.isLoading,
+                ),
               ),
 
               const SizedBox(height: AppSizes.lg),
