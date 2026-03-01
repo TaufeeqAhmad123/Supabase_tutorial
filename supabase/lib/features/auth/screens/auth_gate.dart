@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
-import 'package:supabase_basic/features/auth/screens/login_screen.dart';
+import 'package:supabase_basic/features/auth/screens/auth_method_screen.dart';
 import 'package:supabase_basic/features/home/screens/home_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -24,7 +24,7 @@ class AuthGate extends StatelessWidget {
         if (snapshot.hasData) {
           return const HomeScreen();
         } else {
-          return const LoginScreen();
+          return const AuthMethodScreen();
         }
       },
     );

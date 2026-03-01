@@ -8,7 +8,7 @@ import 'package:supabase_basic/core/constants/app_strings.dart';
 import 'package:supabase_basic/core/theme/page_transitions.dart';
 import 'package:supabase_basic/core/widgets/custom_button.dart';
 
-import 'login_screen.dart';
+import 'auth_method_screen.dart';
 
 /// Data model for a single onboarding page.
 class _OnboardingPageData {
@@ -74,7 +74,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _navigateToLogin() {
     Navigator.of(
       context,
-    ).pushReplacement(AppPageTransitions.fadeSlide(const LoginScreen()));
+    ).pushReplacement(AppPageTransitions.fadeSlide(const AuthMethodScreen()));
   }
 
   @override

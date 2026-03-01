@@ -96,41 +96,72 @@ class AuthService {
     await _supabase.from('profiles').upsert(profileData);
     return Profile.fromJson(profileData);
   }
-// login with facebook
-Future<void> signInWithFacebook() async {
-  await _supabase.auth.signInWithOAuth(
-    OAuthProvider.facebook,
-    redirectTo: 'devcode://fblogin',
-    queryParams: {
-      'auth_type': 'reauthenticate', // ⭐ important
-    },
-    authScreenLaunchMode:
-        LaunchMode.externalApplication, // Launch the auth screen in a new webview on mobile.
-  );
-  _supabase.auth.onAuthStateChange.listen((authState) {
-    if (authState.session != null) {
-      final user=authState.session?.user;
-      getFacebookUserData(user!);
-    }
-  });
-}
-void getFacebookUserData(User user) {
-  // Safely check if metadata exists
-  final metadata = user.userMetadata ?? {};
 
-  final email = user.email ?? '';
-  final name = metadata['full_name'] ?? '';
-  final avatar = metadata['avatar_url'] ?? '';
-
-  print("Email: $email");
-  print("Name: $name");
-  print("Avatar: $avatar");
-
-  // Save to Supabase table only if email exists
-  if (email.isNotEmpty) {
-    createProfile(name, email, avatar, 'facebook');
+  // login with facebook
+  Future<void> signInWithFacebook() async {
+    await _supabase.auth.signInWithOAuth(
+      OAuthProvider.facebook,
+      redirectTo: 'devcode://fblogin',
+      queryParams: {
+        'auth_type': 'reauthenticate', // ⭐ important
+      },
+      authScreenLaunchMode: LaunchMode
+          .externalApplication, // Launch the auth screen in a new webview on mobile.
+    );
+    _supabase.auth.onAuthStateChange.listen((authState) {
+      if (authState.session != null) {
+        final user = authState.session?.user;
+        getFacebookUserData(user!);
+      }
+    });
   }
-}
+
+  void getFacebookUserData(User user) {
+    // Safely check if metadata exists
+    final metadata = user.userMetadata ?? {};
+
+    final email = user.email ?? '';
+    final name = metadata['full_name'] ?? '';
+    final avatar = metadata['avatar_url'] ?? '';
+
+    print("Email: $email");
+    print("Name: $name");
+    print("Avatar: $avatar");
+
+    // Save to Supabase table only if email exists
+    if (email.isNotEmpty) {
+      createProfile(name, email, avatar, 'facebook');
+    }
+  }
+
+  // Sign in with Phone (send OTP)
+  Future<void> signInWithPhone(String phoneNumber) async {
+    await _supabase.auth.signInWithOtp(phone: phoneNumber);
+  }
+
+  // Verify Phone OTP
+  Future<AuthResponse> verifyPhoneOtp(String phone, String otpCode) async {
+    final response = await _supabase.auth.verifyOTP(
+      phone: phone,
+      token: otpCode,
+      type: OtpType.sms,
+    );
+    final User? user = response.user;
+    if (user != null) {
+      // Only create profile if it doesn't already exist
+      final existingProfile = await getProfile(user.id);
+      if (existingProfile == null) {
+        await createProfile(
+          user.userMetadata?['full_name'] ?? '',
+          user.email ?? '',
+          user.userMetadata?['avatar_url'] ?? '',
+          'phone',
+        );
+      }
+    }
+    return response;
+  }
+
   Future<Profile?> getProfile(String id) async {
     try {
       if (user == null) {
@@ -153,11 +184,11 @@ void getFacebookUserData(User user) {
   //sign out
   Future<void> signOut() async {
     await _supabase.auth.signOut();
-      // Force Facebook account chooser next login
-  // await launchUrl(
-  //   Uri.parse("https://www.facebook.com/logout.php"),
-  //   mode: LaunchMode.externalApplication,
-  // );
+    // Force Facebook account chooser next login
+    // await launchUrl(
+    //   Uri.parse("https://www.facebook.com/logout.php"),
+    //   mode: LaunchMode.externalApplication,
+    // );
   }
 
   //get current user

@@ -57,4 +57,25 @@ class AppStrings {
   static const String welcomeSubtitle =
       'Your account has been created successfully. Welcome aboard!';
   static const String continueText = 'Continue';
+
+  // ── Auth Method ──────────────────────────────────────────
+  static const String chooseMethod = 'How would you\nlike to continue?';
+  static const String chooseMethodSubtitle =
+      'Select your preferred sign-in method to get started.';
+  static const String continueWithEmail = 'Continue with Email';
+  static const String continueWithPhone = 'Continue with Phone';
+
+  // ── Phone Auth ───────────────────────────────────────────
+  static const String phoneLogin = 'Phone Login';
+  static const String phoneLoginSubtitle =
+      'Enter your phone number and we\'ll send you a verification code.';
+  static const String phoneNumber = 'Phone Number';
+  static const String phoneHint = '+1 234 567 890';
+  static const String sendCode = 'Send Code';
+
+  // ── OTP ──────────────────────────────────────────────────
+  static const String verifyPhone = 'Verify Phone';
+  static const String otpSubtitle = 'Enter the 6-digit code sent to';
+  static const String verifyCode = 'Verify Code';
+  static const String resendIn = 'Resend in';
 }
