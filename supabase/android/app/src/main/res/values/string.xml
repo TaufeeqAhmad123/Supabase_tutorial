@@ -1,5 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
 
-<string name="facebook_app_id">941346211912411</string>
-<string name="fb_login_protocol_scheme">fb941346211912411</string>
-<string name="facebook_client_token">874aba4ad2e1a3c65d7cde06d1919c13</string>
+    <string name="app_name">supabase_tutorial</string>
 
+    <!-- Facebook Login -->
+    <string name="facebook_app_id">941346211912411</string>
+    <string name="fb_login_protocol_scheme">fb941346211912411</string>
+    <string name="facebook_client_token">874aba4ad2e1a3c65d7cde06d1919c13</string>
+
+</resources>

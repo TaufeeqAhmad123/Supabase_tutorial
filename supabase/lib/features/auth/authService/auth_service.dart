@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_basic/model/model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -101,9 +101,35 @@ Future<void> signInWithFacebook() async {
   await _supabase.auth.signInWithOAuth(
     OAuthProvider.facebook,
     redirectTo: 'devcode://fblogin',
+    queryParams: {
+      'auth_type': 'reauthenticate', // ⭐ important
+    },
     authScreenLaunchMode:
         LaunchMode.externalApplication, // Launch the auth screen in a new webview on mobile.
   );
+  _supabase.auth.onAuthStateChange.listen((authState) {
+    if (authState.session != null) {
+      final user=authState.session?.user;
+      getFacebookUserData(user!);
+    }
+  });
+}
+void getFacebookUserData(User user) {
+  // Safely check if metadata exists
+  final metadata = user.userMetadata ?? {};
+
+  final email = user.email ?? '';
+  final name = metadata['full_name'] ?? '';
+  final avatar = metadata['avatar_url'] ?? '';
+
+  print("Email: $email");
+  print("Name: $name");
+  print("Avatar: $avatar");
+
+  // Save to Supabase table only if email exists
+  if (email.isNotEmpty) {
+    createProfile(name, email, avatar, 'facebook');
+  }
 }
   Future<Profile?> getProfile(String id) async {
     try {
@@ -127,6 +153,11 @@ Future<void> signInWithFacebook() async {
   //sign out
   Future<void> signOut() async {
     await _supabase.auth.signOut();
+      // Force Facebook account chooser next login
+  // await launchUrl(
+  //   Uri.parse("https://www.facebook.com/logout.php"),
+  //   mode: LaunchMode.externalApplication,
+  // );
   }
 
   //get current user

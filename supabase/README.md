@@ -38,10 +38,12 @@
 8. now in app -> main-> res-> values-> create string xml and past the code
 
    ```xml
-   <string name="app_name">supabase_tutorial</string>
-   <string name="facebook_app_id">client_id</string>
-   <string name="fb_login_protocol_scheme">fbclient_id</string>
-   <string name="facebook_client_token">client_token</string>
+   <resources>
+        <string name="app_name">supabase_tutorial</string>
+        <string name="facebook_app_id">client_id</string>
+        <string name="fb_login_protocol_scheme">fbclient_id</string>
+        <string name="facebook_client_token">client_token</string>
+   </resources>
    ```
 
    client token will be in setting-> advance

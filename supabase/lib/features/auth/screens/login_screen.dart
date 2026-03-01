@@ -169,9 +169,7 @@ class LoginScreen extends StatelessWidget {
                   icon: Icons.facebook_rounded,
                   iconColor: const Color(0xFF1877F2),
                   onPressed: () {
-                    Navigator.of(
-                      context,
-                    ).push(AppPageTransitions.fadeSlide(const WelcomeScreen()));
+                    authProvider.signInWithFacebook();
                   },
                 ),
               ),
