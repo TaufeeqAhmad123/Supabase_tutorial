@@ -1,4 +1,4 @@
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_basic/model/model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -7,7 +7,7 @@ class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
   User? get user => _supabase.auth.currentUser;
 
-  //sign in with email and password
+  // ── Email/Password Auth ─────────────────────────────────
   Future<AuthResponse> signInWithEmailAndPassword(
     String email,
     String password,
@@ -18,7 +18,6 @@ class AuthService {
     );
   }
 
-  //sign up with email and password
   Future<AuthResponse> createAccountWithEmailAndPassword(
     String email,
     String password,
@@ -26,13 +25,11 @@ class AuthService {
     return await _supabase.auth.signUp(email: email, password: password);
   }
 
-  //Signinwith Google
-  Future<AuthResponse> signInWithGoogle() async {
+  // ── Google Sign-In ──────────────────────────────────────
+  Future<void> signInWithGoogle() async {
     try {
-      GoogleSignIn signIn = GoogleSignIn.instance;
-
-      GoogleSignInAccount googleAccount = await signIn.authenticate();
-      String idToken = googleAccount.authentication.idToken ?? '';
+      final googleAccount = await GoogleSignIn.instance.authenticate();
+      final idToken = googleAccount.authentication.idToken ?? '';
       final auth =
           await googleAccount.authorizationClient.authorizationForScopes([
             'email',
@@ -44,14 +41,15 @@ class AuthService {
             'openid',
             'profile',
           ]);
-      final AuthResponse response = await _supabase.auth.signInWithIdToken(
+
+      final response = await _supabase.auth.signInWithIdToken(
         provider: OAuthProvider.google,
         idToken: idToken,
         accessToken: auth.accessToken,
       );
+
       final User? user = response.user;
       if (user != null) {
-        // Only create profile if it doesn't already exist
         final existingProfile = await getProfile(user.id);
         if (existingProfile == null) {
           await createProfile(
@@ -62,84 +60,44 @@ class AuthService {
           );
         }
       }
-      return response;
     } catch (e) {
-      print(e);
+      debugPrint('Google sign-in error: $e');
       rethrow;
     }
   }
 
-  // Create profile and store it in Supabase
-  Future<Profile> createProfile(
-    String name,
-    String email,
-    String avatarUrl,
-    String provider,
-  ) async {
-    if (user == null) {
-      throw AuthException('User not found');
-    }
-
-    final now = DateTime.now().toIso8601String();
-
-    final profileData = {
-      'id': user!.id,
-      'email': email,
-      'full_name': name,
-      'avatar_url': avatarUrl,
-      'provider': provider,
-      'created_at': now,
-      'updated_at': now,
-    };
-
-    // Upsert into the 'profiles' table (insert or update if exists)
-    await _supabase.from('profiles').upsert(profileData);
-    return Profile.fromJson(profileData);
-  }
-
-  // login with facebook
+  // ── Facebook Sign-In ────────────────────────────────────
   Future<void> signInWithFacebook() async {
     await _supabase.auth.signInWithOAuth(
       OAuthProvider.facebook,
       redirectTo: 'devcode://fblogin',
-      queryParams: {
-        'auth_type': 'reauthenticate', // ⭐ important
-      },
-      authScreenLaunchMode: LaunchMode
-          .externalApplication, // Launch the auth screen in a new webview on mobile.
+      queryParams: {'auth_type': 'reauthenticate'},
+      authScreenLaunchMode: LaunchMode.externalApplication,
     );
     _supabase.auth.onAuthStateChange.listen((authState) {
       if (authState.session != null) {
         final user = authState.session?.user;
-        getFacebookUserData(user!);
+        if (user != null) _saveFacebookProfile(user);
       }
     });
   }
 
-  void getFacebookUserData(User user) {
-    // Safely check if metadata exists
+  void _saveFacebookProfile(User user) {
     final metadata = user.userMetadata ?? {};
-
     final email = user.email ?? '';
     final name = metadata['full_name'] ?? '';
     final avatar = metadata['avatar_url'] ?? '';
 
-    print("Email: $email");
-    print("Name: $name");
-    print("Avatar: $avatar");
-
-    // Save to Supabase table only if email exists
     if (email.isNotEmpty) {
       createProfile(name, email, avatar, 'facebook');
     }
   }
 
-  // Sign in with Phone (send OTP)
+  // ── Phone OTP Auth ──────────────────────────────────────
   Future<void> signInWithPhone(String phoneNumber) async {
     await _supabase.auth.signInWithOtp(phone: phoneNumber);
   }
 
-  // Verify Phone OTP
   Future<AuthResponse> verifyPhoneOtp(String phone, String otpCode) async {
     final response = await _supabase.auth.verifyOTP(
       phone: phone,
@@ -148,7 +106,6 @@ class AuthService {
     );
     final User? user = response.user;
     if (user != null) {
-      // Only create profile if it doesn't already exist
       final existingProfile = await getProfile(user.id);
       if (existingProfile == null) {
         await createProfile(
@@ -162,11 +119,33 @@ class AuthService {
     return response;
   }
 
+  // ── Profile Management ──────────────────────────────────
+  Future<Profile> createProfile(
+    String name,
+    String email,
+    String avatarUrl,
+    String provider,
+  ) async {
+    if (user == null) throw AuthException('User not found');
+
+    final now = DateTime.now().toIso8601String();
+    final profileData = {
+      'id': user!.id,
+      'email': email,
+      'full_name': name,
+      'avatar_url': avatarUrl,
+      'provider': provider,
+      'created_at': now,
+      'updated_at': now,
+    };
+
+    await _supabase.from('profiles').upsert(profileData);
+    return Profile.fromJson(profileData);
+  }
+
   Future<Profile?> getProfile(String id) async {
     try {
-      if (user == null) {
-        throw AuthException('User not found');
-      }
+      if (user == null) throw AuthException('User not found');
 
       final data = await _supabase
           .from('profiles')
@@ -181,24 +160,14 @@ class AuthService {
     }
   }
 
-  //sign out
+  // ── Sign Out ────────────────────────────────────────────
   Future<void> signOut() async {
     await _supabase.auth.signOut();
-    // Force Facebook account chooser next login
-    // await launchUrl(
-    //   Uri.parse("https://www.facebook.com/logout.php"),
-    //   mode: LaunchMode.externalApplication,
-    // );
   }
 
-  //get current user
-  String? getCurrentUser() {
-    final session = _supabase.auth.currentSession;
-    final user = session?.user;
-    return user?.email;
-  }
+  // ── Utility ─────────────────────────────────────────────
+  String? getCurrentUser() => _supabase.auth.currentSession?.user.email;
 
-  //listen to auth changes
   Stream<User?> get authStateChanges =>
       _supabase.auth.onAuthStateChange.map((event) => event.session?.user);
 }
