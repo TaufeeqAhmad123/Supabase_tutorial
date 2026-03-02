@@ -4,6 +4,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_basic/core/constants/app_colors.dart';
 import 'package:supabase_basic/core/constants/app_sizes.dart';
+import 'package:supabase_basic/core/utils/app_snackbar.dart';
 import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
 
 /// Premium profile screen with avatar, name, email, and logout.
@@ -202,9 +203,15 @@ class ProfileScreen extends StatelessWidget {
                             AppSizes.radiusLg,
                           ),
                         ),
-                        onPressed: () {
-                          authProvider.signOut();
-                          Navigator.pop(context);
+                        onPressed: () async {
+                          await authProvider.signOut();
+                          if (context.mounted) {
+                            AppSnackbar.success(
+                              context,
+                              message: 'Signed out successfully. See you soon!',
+                            );
+                            Navigator.pop(context);
+                          }
                         },
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,

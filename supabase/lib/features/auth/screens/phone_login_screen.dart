@@ -6,11 +6,13 @@ import 'package:supabase_basic/core/constants/app_colors.dart';
 import 'package:supabase_basic/core/constants/app_sizes.dart';
 import 'package:supabase_basic/core/constants/app_strings.dart';
 import 'package:supabase_basic/core/theme/page_transitions.dart';
+import 'package:supabase_basic/core/utils/app_snackbar.dart';
 import 'package:supabase_basic/core/widgets/auth_header.dart';
 import 'package:supabase_basic/core/widgets/custom_button.dart';
 import 'package:supabase_basic/core/widgets/custom_text_field.dart';
 import 'package:supabase_basic/features/auth/provider/phone_auth_provider.dart';
 import 'package:supabase_basic/features/auth/screens/otp_screen.dart';
+
 /// Screen where users enter their phone number to receive an OTP.
 class PhoneLoginScreen extends StatelessWidget {
   const PhoneLoginScreen({super.key});
@@ -155,9 +157,20 @@ class PhoneLoginScreen extends StatelessWidget {
                   onPressed: () async {
                     final success = await phoneProv.sendOtp();
                     if (success && context.mounted) {
+                      AppSnackbar.info(
+                        context,
+                        message: 'OTP sent to ${phoneProv.phoneNumber}',
+                      );
                       Navigator.of(
                         context,
                       ).push(AppPageTransitions.slideRight(const OtpScreen()));
+                    } else if (!success && context.mounted) {
+                      if (phoneProv.errorMessage != null) {
+                        AppSnackbar.error(
+                          context,
+                          message: phoneProv.errorMessage!,
+                        );
+                      }
                     }
                   },
                 ),

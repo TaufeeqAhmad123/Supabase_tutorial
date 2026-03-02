@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_basic/core/constants/app_colors.dart';
 import 'package:supabase_basic/core/constants/app_sizes.dart';
 import 'package:supabase_basic/core/constants/app_strings.dart';
+import 'package:supabase_basic/core/utils/app_snackbar.dart';
 import 'package:supabase_basic/core/widgets/custom_button.dart';
 import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
 import 'package:supabase_basic/features/auth/provider/phone_auth_provider.dart';
@@ -184,12 +185,17 @@ class OtpScreen extends StatelessWidget {
                   onPressed: () async {
                     final success = await phoneProv.verifyOtp(authProvider);
                     if (success && context.mounted) {
+                      AppSnackbar.success(
+                        context,
+                        message: 'Phone verified successfully! \u{1F389}',
+                      );
                       // Pop all the way back to AuthGate
                       Navigator.of(context).popUntil((route) => route.isFirst);
                     } else if (!success && context.mounted) {
                       if (phoneProv.errorMessage != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(phoneProv.errorMessage!)),
+                        AppSnackbar.error(
+                          context,
+                          message: phoneProv.errorMessage!,
                         );
                       }
                     }
@@ -212,7 +218,16 @@ class OtpScreen extends StatelessWidget {
                     ),
                     phoneProv.canResend
                         ? GestureDetector(
-                            onTap: () => phoneProv.resendOtp(),
+                            onTap: () async {
+                              await phoneProv.resendOtp();
+                              if (context.mounted) {
+                                AppSnackbar.info(
+                                  context,
+                                  message:
+                                      'OTP resent to ${phoneProv.phoneNumber}',
+                                );
+                              }
+                            },
                             child: Text(
                               AppStrings.resendCode,
                               style: Theme.of(context).textTheme.titleMedium

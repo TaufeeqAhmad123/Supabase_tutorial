@@ -7,6 +7,7 @@ import 'package:supabase_basic/core/constants/app_colors.dart';
 import 'package:supabase_basic/core/constants/app_sizes.dart';
 import 'package:supabase_basic/core/constants/app_strings.dart';
 import 'package:supabase_basic/core/theme/page_transitions.dart';
+import 'package:supabase_basic/core/utils/app_snackbar.dart';
 import 'package:supabase_basic/core/widgets/auth_header.dart';
 import 'package:supabase_basic/core/widgets/custom_button.dart'
     show CustomButton;
@@ -15,7 +16,6 @@ import 'package:supabase_basic/core/widgets/or_divider.dart';
 import 'package:supabase_basic/core/widgets/social_login_button.dart';
 import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
 import 'package:supabase_basic/features/auth/provider/login_provider.dart';
-import 'package:supabase_basic/features/auth/screens/welcome_screen.dart';
 import 'signup_screen.dart';
 
 /// Login screen — pure UI, all logic lives in LoginProvider.
@@ -108,10 +108,16 @@ class LoginScreen extends StatelessWidget {
                         final success = await loginProv.handleLogin(
                           authProvider,
                         );
-                        if (!success && context.mounted) {
+                        if (success && context.mounted) {
+                          AppSnackbar.success(
+                            context,
+                            message: 'Welcome back! You\'re now logged in.',
+                          );
+                        } else if (!success && context.mounted) {
                           if (loginProv.errorMessage != null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(loginProv.errorMessage!)),
+                            AppSnackbar.error(
+                              context,
+                              message: loginProv.errorMessage!,
                             );
                           }
                         }

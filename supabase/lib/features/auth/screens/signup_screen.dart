@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:supabase_basic/core/constants/app_colors.dart';
 import 'package:supabase_basic/core/constants/app_sizes.dart';
 import 'package:supabase_basic/core/constants/app_strings.dart';
+import 'package:supabase_basic/core/utils/app_snackbar.dart';
 import 'package:supabase_basic/core/utils/deepLink.dart';
 import 'package:supabase_basic/core/widgets/auth_header.dart';
 import 'package:supabase_basic/core/widgets/custom_button.dart';
@@ -147,11 +148,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     );
                     if (!success && context.mounted) {
                       if (signupProvider.errorMessage != null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(signupProvider.errorMessage!)),
+                        AppSnackbar.error(
+                          context,
+                          message: signupProvider.errorMessage!,
                         );
                       }
                     } else if (success && context.mounted) {
+                      AppSnackbar.success(
+                        context,
+                        message: 'Account created successfully! 🎉',
+                      );
                       // Pop all screens back to AuthGate
                       Navigator.of(context).popUntil((route) => route.isFirst);
                     }
