@@ -24,45 +24,34 @@ class AuthProvider extends ChangeNotifier {
   /// Auth state changes stream (used by AuthGate)
   Stream<User?> get authStateChanges => _authService.authStateChanges;
 
-  //signin with google
-  Future<void> signInWithGoogle() async {
+  // ── Social Sign-In (shared helper) ─────────────────────
+  Future<void> _socialSignIn(
+    Future<void> Function() signInFn,
+    String label,
+  ) async {
     _isLoading = true;
     notifyListeners();
     try {
-      await _authService.signInWithGoogle();
-      // Fetch the profile right after sign-in
+      await signInFn();
       final userId = _authService.user?.id;
       if (userId != null) {
         _currentProfile = await _authService.getProfile(userId);
       }
-      notifyListeners();
     } catch (e) {
-      debugPrint('Sign in with Google error: $e');
+      debugPrint('$label error: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  //signin with facebook
-  Future<void> signInWithFacebook() async {
-    _isLoading = true;
-    notifyListeners();
-    try {
-      await _authService.signInWithFacebook();
-      // Fetch the profile right after sign-in
-      final userId = _authService.user?.id;
-      if (userId != null) {
-        _currentProfile = await _authService.getProfile(userId);
-      }
-      notifyListeners();
-    } catch (e) {
-      debugPrint('Sign in with Facebook error: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
+  /// Sign in with Google
+  Future<void> signInWithGoogle() =>
+      _socialSignIn(_authService.signInWithGoogle, 'Google sign-in');
+
+  /// Sign in with Facebook
+  Future<void> signInWithFacebook() =>
+      _socialSignIn(_authService.signInWithFacebook, 'Facebook sign-in');
 
   // ── Sign Out ───────────────────────────────────────────
   Future<void> signOut() async {
@@ -81,7 +70,6 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _currentProfile = await _authService.getProfile(id);
-      notifyListeners();
     } catch (e) {
       debugPrint('Get profile error: $e');
     } finally {

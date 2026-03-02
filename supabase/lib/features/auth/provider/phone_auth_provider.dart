@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:supabase_basic/core/utils/validators.dart';
 import 'package:supabase_basic/features/auth/authService/auth_service.dart';
 import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -32,23 +33,9 @@ class PhoneAuthProvider extends ChangeNotifier {
 
   // ── Validation ──────────────────────────────────────────
   bool _validatePhone() {
-    _phoneError = null;
-
-    final phone = phoneController.text.trim();
-    if (phone.isEmpty) {
-      _phoneError = 'Please enter your phone number';
-      notifyListeners();
-      return false;
-    }
-    // Basic check: must start with + and be at least 8 chars
-    if (!phone.startsWith('+') || phone.length < 8) {
-      _phoneError = 'Enter a valid phone number (e.g. +1234567890)';
-      notifyListeners();
-      return false;
-    }
-
+    _phoneError = Validators.phone(phoneController.text);
     notifyListeners();
-    return true;
+    return _phoneError == null;
   }
 
   // ── Send OTP ────────────────────────────────────────────
@@ -69,13 +56,11 @@ class PhoneAuthProvider extends ChangeNotifier {
     } on AuthException catch (e) {
       _errorMessage = e.message;
       _isLoading = false;
-      print(e.message);
       notifyListeners();
       return false;
     } catch (e) {
       _errorMessage = e.toString();
       _isLoading = false;
-      print(e.toString());
       notifyListeners();
       return false;
     }
@@ -99,9 +84,7 @@ class PhoneAuthProvider extends ChangeNotifier {
       final user = response.user;
       if (user != null) {
         final profile = await _authService.getProfile(user.id);
-        if (profile != null) {
-          authProvider.setProfile(profile);
-        }
+        if (profile != null) authProvider.setProfile(profile);
       }
       _isLoading = false;
       notifyListeners();
@@ -126,9 +109,7 @@ class PhoneAuthProvider extends ChangeNotifier {
     _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _resendSeconds--;
       notifyListeners();
-      if (_resendSeconds <= 0) {
-        timer.cancel();
-      }
+      if (_resendSeconds <= 0) timer.cancel();
     });
   }
 

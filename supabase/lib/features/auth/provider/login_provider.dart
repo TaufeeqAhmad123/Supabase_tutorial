@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_basic/core/utils/validators.dart';
 import 'package:supabase_basic/features/auth/authService/auth_service.dart';
 import 'package:supabase_basic/features/auth/provider/auth_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -11,38 +12,20 @@ class LoginProvider extends ChangeNotifier {
 
   bool _isLoading = false;
   String? _errorMessage;
-
-  bool get isLoading => _isLoading;
-  String? get errorMessage => _errorMessage;
-
-  // ── Validation ──────────────────────────────────────────
   String? _emailError;
   String? _passwordError;
 
+  bool get isLoading => _isLoading;
+  String? get errorMessage => _errorMessage;
   String? get emailError => _emailError;
   String? get passwordError => _passwordError;
 
+  // ── Validation ──────────────────────────────────────────
   bool _validate() {
-    _emailError = null;
-    _passwordError = null;
-
-    bool valid = true;
-
-    if (emailController.text.trim().isEmpty) {
-      _emailError = 'Please enter your email';
-      valid = false;
-    } else if (!emailController.text.contains('@')) {
-      _emailError = 'Enter a valid email address';
-      valid = false;
-    }
-
-    if (passwordController.text.trim().isEmpty) {
-      _passwordError = 'Please enter your password';
-      valid = false;
-    }
-
+    _emailError = Validators.email(emailController.text);
+    _passwordError = Validators.password(passwordController.text);
     notifyListeners();
-    return valid;
+    return _emailError == null && _passwordError == null;
   }
 
   // ── Handle Login ────────────────────────────────────────
@@ -63,9 +46,7 @@ class LoginProvider extends ChangeNotifier {
       final user = _authService.user;
       if (user != null) {
         final profile = await _authService.getProfile(user.id);
-        if (profile != null) {
-          authProvider.setProfile(profile);
-        }
+        if (profile != null) authProvider.setProfile(profile);
       }
 
       _isLoading = false;
