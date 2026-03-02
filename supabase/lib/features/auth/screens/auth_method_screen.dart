@@ -5,6 +5,7 @@ import 'package:supabase_basic/core/constants/app_colors.dart';
 import 'package:supabase_basic/core/constants/app_sizes.dart';
 import 'package:supabase_basic/core/constants/app_strings.dart';
 import 'package:supabase_basic/core/theme/page_transitions.dart';
+import 'package:supabase_basic/core/widgets/custom_button.dart';
 import 'package:supabase_basic/features/auth/screens/login_screen.dart';
 import 'package:supabase_basic/features/auth/screens/phone_login_screen.dart';
 
@@ -112,12 +113,12 @@ class AuthMethodScreen extends StatelessWidget {
               FadeInUp(
                 delay: const Duration(milliseconds: 500),
                 duration: const Duration(milliseconds: 600),
-                child: _AuthMethodButton(
+                child: CustomButton(
                   icon: Iconsax.sms,
-                  label: AppStrings.continueWithEmail,
+                  text: AppStrings.continueWithEmail,
                   gradient: AppColors.primaryGradient,
                   shadowColor: AppColors.primary,
-                  onTap: () {
+                  onPressed: () {
                     Navigator.of(
                       context,
                     ).push(AppPageTransitions.fadeSlide(const LoginScreen()));
@@ -131,12 +132,12 @@ class AuthMethodScreen extends StatelessWidget {
               FadeInUp(
                 delay: const Duration(milliseconds: 650),
                 duration: const Duration(milliseconds: 600),
-                child: _AuthMethodButton(
+                child: CustomButton(
                   icon: Iconsax.call,
-                  label: AppStrings.continueWithPhone,
+                  text: AppStrings.continueWithPhone,
                   gradient: AppColors.accentGradient,
                   shadowColor: AppColors.accent,
-                  onTap: () {
+                  onPressed: () {
                     Navigator.of(context).push(
                       AppPageTransitions.fadeSlide(const PhoneLoginScreen()),
                     );
@@ -146,108 +147,6 @@ class AuthMethodScreen extends StatelessWidget {
 
               const SizedBox(height: AppSizes.xxl),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// A premium method-selection button with gradient, icon, and glow shadow.
-class _AuthMethodButton extends StatefulWidget {
-  const _AuthMethodButton({
-    required this.icon,
-    required this.label,
-    required this.gradient,
-    required this.shadowColor,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final LinearGradient gradient;
-  final Color shadowColor;
-  final VoidCallback onTap;
-
-  @override
-  State<_AuthMethodButton> createState() => _AuthMethodButtonState();
-}
-
-class _AuthMethodButtonState extends State<_AuthMethodButton>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scale;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 120),
-    );
-    _scale = Tween<double>(
-      begin: 1.0,
-      end: 0.96,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => _controller.forward(),
-      onTapUp: (_) {
-        _controller.reverse();
-        widget.onTap();
-      },
-      onTapCancel: () => _controller.reverse(),
-      child: AnimatedBuilder(
-        animation: _scale,
-        builder: (context, child) {
-          return Transform.scale(scale: _scale.value, child: child);
-        },
-        child: Container(
-          width: double.infinity,
-          height: AppSizes.buttonHeight,
-          decoration: BoxDecoration(
-            gradient: widget.gradient,
-            borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-            boxShadow: [
-              BoxShadow(
-                color: widget.shadowColor.withValues(alpha: 0.35),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-              splashColor: Colors.white.withValues(alpha: 0.15),
-              highlightColor: Colors.white.withValues(alpha: 0.05),
-              onTap: widget.onTap,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(widget.icon, color: Colors.white, size: 22),
-                  const SizedBox(width: AppSizes.sm),
-                  Text(
-                    widget.label,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
         ),
       ),

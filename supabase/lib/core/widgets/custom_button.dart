@@ -24,6 +24,7 @@ class CustomButton extends StatefulWidget {
     this.gradient,
     this.backgroundColor,
     this.foregroundColor,
+    this.shadowColor,
   });
 
   final String text;
@@ -39,6 +40,7 @@ class CustomButton extends StatefulWidget {
   final Gradient? gradient;
   final Color? backgroundColor;
   final Color? foregroundColor;
+  final Color? shadowColor;
 
   @override
   State<CustomButton> createState() => _CustomButtonState();
@@ -105,7 +107,9 @@ class _CustomButtonState extends State<CustomButton>
             ? []
             : [
                 BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.35),
+                  color: (widget.shadowColor ?? AppColors.primary).withValues(
+                    alpha: 0.35,
+                  ),
                   blurRadius: 16,
                   offset: const Offset(0, 6),
                 ),
