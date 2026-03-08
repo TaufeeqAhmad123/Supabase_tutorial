@@ -1,11 +1,23 @@
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
 import 'package:supabase_basic/model/model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
   User? get user => _supabase.auth.currentUser;
+ String get email=>_supabase.auth.currentUser!.email!;
+  // ScreenRedirect(User user)async{
+  //   if(user !=null){
+  //     if(user.emailConfirmedAt!=null){
+  //       return HomeScreen();
+  //     }else{
+  //       return EmailVerificationScreen();
+  //     }
+  //   }
+  //   return LoginScreen();
+  // }
 
   // ── Email/Password Auth ─────────────────────────────────
   Future<AuthResponse> signInWithEmailAndPassword(

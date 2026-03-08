@@ -113,6 +113,9 @@ class LoginScreen extends StatelessWidget {
                             context,
                             message: 'Welcome back! You\'re now logged in.',
                           );
+                          Navigator.of(
+                            context,
+                          ).popUntil((route) => route.isFirst);
                         } else if (!success && context.mounted) {
                           if (loginProv.errorMessage != null) {
                             AppSnackbar.error(
