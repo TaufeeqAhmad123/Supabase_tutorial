@@ -7,7 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
   User? get user => _supabase.auth.currentUser;
- String get email=>_supabase.auth.currentUser!.email!;
+  String get email => _supabase.auth.currentUser!.email!;
   // ScreenRedirect(User user)async{
   //   if(user !=null){
   //     if(user.emailConfirmedAt!=null){
@@ -180,6 +180,11 @@ class AuthService {
   // ── Utility ─────────────────────────────────────────────
   String? getCurrentUser() => _supabase.auth.currentSession?.user.email;
 
-  Stream<User?> get authStateChanges =>
-      _supabase.auth.onAuthStateChange.map((event) => event.session?.user);
+  /// Cached broadcast stream so every listener shares the same subscription.
+  late final Stream<User?> authStateChanges = _supabase.auth.onAuthStateChange
+      .map((event) => event.session?.user)
+      .asBroadcastStream();
+
+  /// The current user from the active session (non-stream, point-in-time check).
+  User? get currentSessionUser => _supabase.auth.currentSession?.user;
 }

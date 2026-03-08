@@ -154,7 +154,15 @@ class LoginScreen extends StatelessWidget {
                         label: AppStrings.google,
                         icon: Icons.g_mobiledata_rounded,
                         iconColor: Colors.red,
-                        onPressed: () => authProvider.signInWithGoogle(),
+                        onPressed: () async {
+                          await authProvider.signInWithGoogle();
+                          if (context.mounted &&
+                              authProvider.currentSessionUser != null) {
+                            Navigator.of(
+                              context,
+                            ).popUntil((route) => route.isFirst);
+                          }
+                        },
                       ),
                     ),
                     const SizedBox(width: AppSizes.md),

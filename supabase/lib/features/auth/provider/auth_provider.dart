@@ -21,8 +21,11 @@ class AuthProvider extends ChangeNotifier {
   /// Current user's ID
   String? get currentUserId => _authService.user?.id;
 
-  /// Auth state changes stream (used by AuthGate)
-  Stream<User?> get authStateChanges => _authService.authStateChanges;
+  /// Auth state changes stream (used by AuthGate) — cached, same instance always.
+  late final Stream<User?> authStateChanges = _authService.authStateChanges;
+
+  /// Current user from the active session (point-in-time, non-stream).
+  User? get currentSessionUser => _authService.currentSessionUser;
 
   // ── Social Sign-In (shared helper) ─────────────────────
   Future<void> _socialSignIn(

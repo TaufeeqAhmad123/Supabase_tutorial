@@ -10,12 +10,16 @@ class AuthGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: true);
 
     return StreamBuilder<User?>(
       stream: authProvider.authStateChanges,
+      // Seed with the current session user so we don't miss an already-emitted event
+      initialData: authProvider.currentSessionUser,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        // Only show loader on the very first connection, not on every rebuild
+        if (snapshot.connectionState == ConnectionState.waiting &&
+            !snapshot.hasData) {
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
