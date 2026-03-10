@@ -46,7 +46,9 @@ class LoginProvider extends ChangeNotifier {
       final user = _authService.user;
       if (user != null) {
         final profile = await _authService.getProfile(user.id);
+
         if (profile != null) authProvider.setProfile(profile);
+        await authProvider.getUserRole(user.id);
       }
 
       _isLoading = false;

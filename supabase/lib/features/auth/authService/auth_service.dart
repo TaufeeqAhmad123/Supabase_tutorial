@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -170,6 +172,31 @@ class AuthService {
     } catch (e) {
       throw AuthException(e.toString());
     }
+  }
+
+  Future<String> getUserRole(String id)async{
+    final data=await _supabase.from('profiles').select('role').eq('id', id).maybeSingle();
+    if(data==null){
+      throw AuthException('User not found');
+    }
+    return data['role'] ?? 'user';
+  }
+
+  Future<void> setProfileIamge(String fileName,ext,File file )async{
+    try{
+      if(user==null){
+        throw AuthException('User not found');
+      }        
+      final result=await _supabase.storage.from('my_supabase').upload('$fileName.$ext', file);
+ 
+      final url=await _supabase.storage.from('my_supabase').getPublicUrl('$fileName.$ext');
+      print("image url is $url");
+    
+     
+    }catch(e){
+      throw AuthException(e.toString());
+    }
+
   }
 
   // ── Sign Out ────────────────────────────────────────────
