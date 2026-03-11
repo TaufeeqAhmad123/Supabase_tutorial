@@ -182,23 +182,41 @@ class AuthService {
     return data['role'] ?? 'user';
   }
 
-  Future<void> setProfileIamge(String fileName,ext,File file )async{
-    try{
-      if(user==null){
-        throw AuthException('User not found');
-      }        
-      final result=await _supabase.storage.from('my_supabase').upload('$fileName.$ext', file);
- 
-      final url=await _supabase.storage.from('my_supabase').getPublicUrl('$fileName.$ext');
-      print("image url is $url");
-    
-     
-    }catch(e){
-      throw AuthException(e.toString());
-    }
+  /// Uploads a profile image to Supabase Storage and updates the profile's avatar_url.
+  /// Returns the public URL of the uploaded image.
+  Future<String> setProfileImage(File file) async {
+    if (user == null) throw AuthException('User not found');
 
+    final ext = file.path.split('.').last;
+    final fileName = '${user!.id}_${DateTime.now().millisecondsSinceEpoch}.$ext';
+
+    await _supabase.storage.from('my_supabase').upload(
+      fileName,
+      file,
+      fileOptions: const FileOptions(upsert: true),
+    );
+
+    final url = _supabase.storage.from('my_supabase').getPublicUrl(fileName);
+
+    // Update the avatar_url in the profiles table
+      await updateProfile({'avatar_url': url});
+
+    debugPrint('Profile image uploaded: $url');
+    return url;
   }
+  Future<void> updateProfile(Map<String,dynamic> data)async{
+   try{
+    final userId=user?.id;
+    if (userId == null) throw Exception('User not logged in');
 
+    await _supabase.from('profiles').update({...data,'updated_at':DateTime.now().toIso8601String()}).eq('id', userId);
+    final updatedProfile=await getProfile(userId);
+    print("Profile updated successfully $updatedProfile");
+   }catch(e){
+    print("Profile update failed: $e");
+    throw AuthException(e.toString());
+   }
+  }
   // ── Sign Out ────────────────────────────────────────────
   Future<void> signOut() async {
     await _supabase.auth.signOut();

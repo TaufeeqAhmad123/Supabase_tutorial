@@ -54,39 +54,106 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: AppSizes.xl),
 
-                // ── Profile Avatar ────────────────────────────
+                // ── Profile Avatar with Upload Button ─────────
                 FadeInDown(
                   duration: const Duration(milliseconds: 500),
-                  child: Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: AppColors.primaryGradient,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.35),
-                          blurRadius: 24,
-                          offset: const Offset(0, 10),
+                  child: Stack(
+                    children: [
+                      Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: AppColors.primaryGradient,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.35),
+                              blurRadius: 24,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    child: (profile != null && profile.avatar_url.isNotEmpty)
-                        ? CircleAvatar(
-                            radius: 60,
-                            backgroundImage: NetworkImage(profile.avatar_url),
-                          )
-                        : Center(
-                            child: Text(
-                              initials,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 42,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 1,
+                        child: (profile != null &&
+                                profile.avatar_url.isNotEmpty)
+                            ? ClipOval(
+                                child: Image.network(
+                                  profile.avatar_url,
+                                  width: 120,
+                                  height: 120,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder:
+                                      (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return const Center(
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    );
+                                  },
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Center(
+                                    child: Text(
+                                      initials,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 42,
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : Center(
+                                child: Text(
+                                  initials,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 42,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 1,
+                                  ),
+                                ),
                               ),
+                      ),
+
+                      // ── Camera Upload Button ──────────────
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () => authProvider.pickAndUploadProfileImage(),
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: AppColors.primaryGradient,
+                              border: Border.all(
+                                color: isDark
+                                    ? AppColors.scaffoldDark
+                                    : AppColors.scaffoldLight,
+                                width: 2.5,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                      AppColors.primary.withValues(alpha: 0.4),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Iconsax.camera,
+                              color: Colors.white,
+                              size: 18,
                             ),
                           ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 

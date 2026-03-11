@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart' as file;
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_basic/features/auth/authService/auth_service.dart';
 import 'package:supabase_basic/model/model.dart';
@@ -11,6 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// Login/SignUp logic lives in their own providers.
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
+  final ImagePicker _imagePicker = ImagePicker();
 
   // ── Profile state ─────────────────────────────────────────
   Profile? _currentProfile;
@@ -33,7 +33,6 @@ class AuthProvider extends ChangeNotifier {
 
   String? _userRole;
   String? get userRole => _userRole;
-  File? pickedFile;
 
   Future<void> getUserRole(String id) async {
     try {
@@ -44,24 +43,34 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setProfileImage(
-    String fileName,
-    String ext,
-    File pickedFile,
-  ) async {
-    String fileName = DateTime.now().microsecondsSinceEpoch.toString();
-    String ext = pickedFile.path.split('.').last;
+  /// Pick an image from the gallery and upload it as the profile avatar.
+  Future<void> pickAndUploadProfileImage() async {
     try {
-      final result = await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (result != null) {
-        pickedFile = File(result.path);
-        print(pickedFile);  
+      final result = await _imagePicker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 80,
+      );
+      if (result == null) return; // user cancelled
+
+      _isLoading = true;
+      notifyListeners();
+
+      final file = File(result.path);
+      await _authService.setProfileImage(file);
+
+      // Refresh the cached profile so the avatar updates in the UI
+      final userId = _authService.user?.id;
+      if (userId != null) {
+        _currentProfile = await _authService.getProfile(userId);
       }
-      await _authService.setProfileIamge(fileName, ext, pickedFile);
     } catch (e) {
       debugPrint('Set profile image error: $e');
+    } finally {
+      _isLoading = false;
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   // ── Social Sign-In (shared helper) ─────────────────────
